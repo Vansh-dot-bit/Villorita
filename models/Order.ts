@@ -128,6 +128,9 @@ const OrderSchema = new mongoose.Schema({
     requestedAt: {
       type: Date,
     },
+    processedAt: {
+      type: Date,
+    },
     adminNote: String,
   },
   createdAt: {

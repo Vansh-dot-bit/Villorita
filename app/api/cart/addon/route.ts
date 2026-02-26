@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     let cart = await Cart.findOne({ user: userIdObj });
     if (!cart) cart = new Cart({ user: userIdObj, items: [], addons: [] });
     
-    if (!cart.addons) cart.addons = [];
+    if (!cart.addons) cart.addons = [] as any;
 
     const existingIndex = cart.addons.findIndex((a: any) => a.addon.toString() === addonId);
     if (existingIndex > -1) {
@@ -58,9 +58,9 @@ export async function DELETE(request: NextRequest) {
     if (!cart) return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
 
     if (addonId) {
-      cart.addons = cart.addons.filter((a: any) => a.addon.toString() !== addonId);
+      cart.addons = cart.addons.filter((a: any) => a.addon.toString() !== addonId) as any;
     } else {
-      cart.addons = [];
+      cart.addons = [] as any;
     }
 
     await cart.save();

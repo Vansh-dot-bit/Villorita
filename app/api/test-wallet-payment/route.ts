@@ -47,7 +47,7 @@ export async function GET() {
           weight: '1kg',
           quantity: 1,
           type: 'Eggless'
-      }];
+      }] as any;
       cart.totalAmount = price;
       await cart.save();
 

@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { requireAuth } from '@/lib/auth';
@@ -50,7 +50,7 @@ export async function PATCH(request: NextRequest) {
 
     // Email update with duplicate check
     if (email) {
-        if (email !== user.email) { // assuming user object from requireAuth has email, or we fetch user first
+        if (email !== (user as any).email) { // assuming user object from requireAuth has email, or we fetch user first
              // Check if email is already taken
              const existingUser = await User.findOne({ email, _id: { $ne: user.userId } });
              if (existingUser) {

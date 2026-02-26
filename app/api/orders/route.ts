@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';
 import Order from '@/models/Order';
@@ -283,13 +283,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Clear cart after order
-    cart.items = [];
-    cart.addons = [];
+    cart.items = [] as any;
+    cart.addons = [] as any;
     await cart.save();
 
     // Send confirmation email
     // Retrieve user email from userDoc if available, otherwise fetch from DB
-    let userEmail = user.email;
+    let userEmail = (user as any).email;
     
     // Always fetch fresh user details to ensure we have the correct email
     try {

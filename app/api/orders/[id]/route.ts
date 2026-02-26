@@ -107,7 +107,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
             order.storeSnapshot = {
                 name: vendorStore.name,
                 address: vendorStore.address || '',
-                phone: vendorStore.phone || '',
+                phone: (vendorStore as any).phone || '',
             };
         }
     } else if (action === 'vendor_verify') {

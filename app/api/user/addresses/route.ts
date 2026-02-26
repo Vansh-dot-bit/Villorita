@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { requireAuth } from '@/lib/auth';
@@ -117,7 +117,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     userProfile.addresses = userProfile.addresses.filter(
-      addr => addr._id.toString() !== addressId
+      (addr: any) => addr._id.toString() !== addressId
     );
 
     await userProfile.save();

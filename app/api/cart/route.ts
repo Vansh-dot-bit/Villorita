@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     // Filter out items where product is null (e.g. deleted products)
     if (cart && cart.items) {
-      cart.items = cart.items.filter((item: any) => item.product);
+      cart.items = cart.items.filter((item: any) => item.product) as any;
     }
 
     return NextResponse.json({
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     
     // Filter out valid items
     if (cart && cart.items) {
-        cart.items = cart.items.filter((item: any) => item.product);
+        cart.items = cart.items.filter((item: any) => item.product) as any;
     }
 
     return NextResponse.json({
@@ -180,10 +180,10 @@ export async function DELETE(request: NextRequest) {
 
     if (itemId) {
       // Remove specific item
-      cart.items = cart.items.filter((item: any) => item._id.toString() !== itemId);
+      cart.items = cart.items.filter((item: any) => item._id.toString() !== itemId) as any;
     } else {
       // Clear entire cart
-      cart.items = [];
+      cart.items = [] as any;
     }
 
     await cart.save();

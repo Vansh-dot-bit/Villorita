@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';

@@ -32,7 +32,7 @@ export async function PATCH(
       }
 
       order.orderStatus = 'Out for Delivery';
-      order.deliveryAgent = agent.userId;
+      order.deliveryAgent = agent.userId as any;
       order.updatedAt = new Date();
       await order.save();
 

@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/auth';
 import mongoose from 'mongoose';
 
 // GET single product by ID
-export async function GET(request, props) {
+export async function GET(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   try {
     await dbConnect();
 
@@ -42,7 +42,7 @@ export async function GET(request, props) {
 }
 
 // PUT - Update product (Admin only)
-export async function PUT(request, props) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   try {
     const user = requireAdmin(request);
     if (user instanceof Response) return user;
@@ -89,7 +89,7 @@ export async function PUT(request, props) {
 }
 
 // DELETE - Delete product (Admin only)
-export async function DELETE(request, props) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   try {
     const user = requireAdmin(request);
     if (user instanceof Response) return user;

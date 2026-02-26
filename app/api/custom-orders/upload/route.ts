@@ -76,9 +76,3 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Configure route to handle file uploads
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};

@@ -5,7 +5,7 @@ import { requireAdmin } from '@/lib/auth';
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = requireAdmin(request);
@@ -14,8 +14,7 @@ export async function PUT(
     const body = await request.json();
     await dbConnect();
     
-    // Await params if Next.js > 15
-    const id = await Promise.resolve(params.id);
+    const { id } = await params;
 
     const addon = await AddOn.findByIdAndUpdate(id, body, { new: true });
     
@@ -31,7 +30,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = requireAdmin(request);
@@ -39,7 +38,7 @@ export async function DELETE(
 
     await dbConnect();
     
-    const id = await Promise.resolve(params.id);
+    const { id } = await params;
     const addon = await AddOn.findByIdAndDelete(id);
 
     if (!addon) {
