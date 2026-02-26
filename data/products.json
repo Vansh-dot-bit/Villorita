@@ -1,0 +1,200 @@
+[
+  {
+    "id": "2",
+    "name": "Berry Blast",
+    "description": "Explosion of berry flavors",
+    "price": 549,
+    "rating": 4.8,
+    "image": "/cakes/berry.jpg",
+    "type": "Contains Egg",
+    "category": "Strawberry",
+    "tags": [
+      "top-sellers",
+      "rich-strawberry"
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Pineapple Punch",
+    "description": "Fresh pineapple chunks",
+    "price": 399,
+    "rating": 4.7,
+    "image": "/cakes/pineapple.jpg",
+    "type": "Eggless",
+    "category": "Pineapple",
+    "tags": [
+      "top-sellers"
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Red Velvet Heart",
+    "description": "Heart shaped red velvet",
+    "price": 899,
+    "rating": 5,
+    "image": "/cakes/heart.jpg",
+    "type": "Eggless",
+    "category": "Red Velvet",
+    "tags": [
+      "our-special"
+    ]
+  },
+  {
+    "id": "5",
+    "name": "Rasmalai Royal",
+    "description": "Traditional Rasmalai fusion",
+    "price": 749,
+    "rating": 4.8,
+    "image": "/cakes/rasmalai.jpg",
+    "type": "Eggless",
+    "category": "Vanilla",
+    "tags": [
+      "our-special"
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Blueberry Glaze",
+    "description": "Shiny blueberry glaze",
+    "price": 649,
+    "rating": 4.6,
+    "image": "/cakes/blueberry.jpg",
+    "type": "Contains Egg",
+    "category": "Cheesecake",
+    "tags": [
+      "our-special"
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Dark Fantasy",
+    "description": "Dark chocolate fantasy",
+    "price": 599,
+    "rating": 4.9,
+    "image": "/cakes/dark.jpg",
+    "type": "Eggless",
+    "category": "Chocolate",
+    "tags": [
+      "rich-chocolate"
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Choco Lava",
+    "description": "Molten lava center",
+    "price": 449,
+    "rating": 4.7,
+    "image": "/cakes/lava.jpg",
+    "type": "Contains Egg",
+    "category": "Chocolate",
+    "tags": [
+      "rich-chocolate"
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Nutella Hazelnut",
+    "description": "Nutella loaded hazelnut",
+    "price": 999,
+    "rating": 5,
+    "image": "/cakes/nutella.jpg",
+    "type": "Eggless",
+    "category": "Chocolate",
+    "tags": [
+      "rich-chocolate"
+    ]
+  },
+  {
+    "id": "10",
+    "name": "Double Truffle",
+    "description": "Rich chocolate ganache layer cake",
+    "price": 599,
+    "rating": 4.9,
+    "image": "/cakes/c1.jpg",
+    "type": "Eggless",
+    "category": "Chocolate",
+    "tags": []
+  },
+  {
+    "id": "11",
+    "name": "Choco Walnut",
+    "description": "Crunchy walnuts with soft sponge",
+    "price": 649,
+    "rating": 4.7,
+    "image": "/cakes/c2.jpg",
+    "type": "Contains Egg",
+    "category": "Chocolate",
+    "tags": []
+  },
+  {
+    "id": "12",
+    "name": "Belgium Dark",
+    "description": "Premium dark chocolate mousse",
+    "price": 799,
+    "rating": 5,
+    "image": "/cakes/c3.jpg",
+    "type": "Eggless",
+    "category": "Chocolate",
+    "tags": []
+  },
+  {
+    "id": "13",
+    "name": "Ferrero Rocher",
+    "description": "Hazelnut crunch delight",
+    "price": 899,
+    "rating": 4.8,
+    "image": "/cakes/c4.jpg",
+    "type": "Eggless",
+    "category": "Chocolate",
+    "tags": []
+  },
+  {
+    "id": "14",
+    "name": "KitKat Cake",
+    "description": "Surrounded by KitKat bars",
+    "price": 699,
+    "rating": 4.6,
+    "image": "/cakes/c5.jpg",
+    "type": "Contains Egg",
+    "category": "Chocolate",
+    "tags": []
+  },
+  {
+    "id": "15",
+    "name": "Strawberry Delight",
+    "description": "Fresh strawberries",
+    "price": 599,
+    "rating": 4.9,
+    "image": "/cakes/dark.jpg",
+    "type": "Eggless",
+    "category": "Strawberry",
+    "tags": [
+      "rich-strawberry"
+    ]
+  },
+  {
+    "id": "16",
+    "name": "Valentine Special Red",
+    "description": "Special red velvet for valentine",
+    "price": 599,
+    "rating": 4.9,
+    "image": "/cakes/dark.jpg",
+    "type": "Eggless",
+    "category": "Red Velvet",
+    "tags": [
+      "valentine-special"
+    ]
+  },
+  {
+    "name": "choco lava",
+    "price": 666,
+    "category": "Chocolate",
+    "image": "/cakes/c1.jpg",
+    "type": "Eggless",
+    "description": "choco with lava",
+    "rating": 5,
+    "costPrice": 300,
+    "tags": [],
+    "id": "jx0q9t88p"
+  }
+]

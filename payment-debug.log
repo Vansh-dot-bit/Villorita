@@ -1,0 +1,4 @@
+[2026-02-24T12:04:44.976Z] user=6980f1fd48459d2e895625fc items=200 addonsTotal=0 subtotal=200 cartAddons=[]
+[2026-02-24T12:13:33.406Z] user=6980f1fd48459d2e895625fc items=200 addonsTotal=80 subtotal=280 cartAddons=[{"addon":"699d8ea0f39f5c38db62208f","name":"poppers","price":20,"quantity":1,"_id":"699d95c6f39f5c38db62216c"},{"addon":"699d8eaaf39f5c38db622092","name":"baloons","price":30,"quantity":2,"_id":"699d95e7f39f5c38db622172"}]
+[2026-02-24T13:39:27.703Z] user=6984e2c3b820a6bef9561075 items=299 addonsTotal=60 subtotal=359 cartAddons=[{"addon":"699d8eaaf39f5c38db622092","name":"baloons","price":30,"quantity":2,"_id":"699da9f4f39f5c38db623618"}]
+[2026-02-25T12:45:37.169Z] user=6984e2c3b820a6bef9561075 items=200 addonsTotal=0 subtotal=200 cartAddons=[]

@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";:root {
+    --background: #fafafa; /* Zinc 50 */
+    --foreground: #18181b; /* Zinc 950 */
+
+    --card: #ffffff;
+    --card-foreground: #18181b;
+
+    --popover: #ffffff;
+    --popover-foreground: #18181b;
+
+    --primary: #7c3aed; /* Violet 600 - Premium Purple */
+    --primary-foreground: #ffffff;
+
+    --secondary: #f4f4f5; /* Zinc 100 */
+    --secondary-foreground: #18181b;
+
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a; /* Zinc 500 */
+
+    --accent: #f4f4f5;
+    --accent-foreground: #18181b;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --border: #e4e4e7; /* Zinc 200 */
+    --input: #e4e4e7;
+    --ring: #7c3aed;
+
+    --radius: 1rem;
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+}
+
+body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-outfit), system-ui, sans-serif;
+    transition: background-color 0.3s ease;
+}
+
+/* 3D Depth effect for modal */
+.auth-modal-open main {
+    transform: scale(0.95);
+    filter: blur(8px) brightness(0.8);
+    pointer-events: none;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+}
+
+main {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+}

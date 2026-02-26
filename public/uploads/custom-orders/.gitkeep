@@ -1,0 +1,2 @@
+// Ensure uploads directory exists
+const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'custom-orders');
