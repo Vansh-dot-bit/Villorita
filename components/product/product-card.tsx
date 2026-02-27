@@ -30,7 +30,7 @@ export function ProductCard({ product }: { product: Product & { id?: string, _id
   return (
     <Link href={`/product/${product.id}`} className="block h-full">
         <Card className="rounded-3xl group h-full overflow-hidden border-none shadow-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer">
-            <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+            <div className="aspect-[4/3] sm:aspect-[4/3] md:aspect-[4/3] lg:aspect-[4/3] xl:aspect-[4/3] 2xl:aspect-[4/3] bg-muted relative overflow-hidden h-32 sm:h-auto">
                 {product.image ? (
                      <img 
                         src={product.image.startsWith('http') ? product.image : `/api/uploads/${product.image}`} 
