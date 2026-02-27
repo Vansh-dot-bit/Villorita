@@ -48,7 +48,7 @@ export function Header({ className }: { className?: string }) {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 w-full border-b backdrop-blur-xl shadow-md ${className || "bg-background/95 supports-[backdrop-filter]:bg-background/60"}`}>
+      <header className={`sticky top-0 z-50 w-full backdrop-blur-xl shadow-sm ${className || "bg-background/95 supports-[backdrop-filter]:bg-background/60"}`}>
         <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
 
           {/* Left: Logo */}
@@ -122,25 +122,18 @@ export function Header({ className }: { className?: string }) {
             </Button>
 
             {/* Mobile: Login/User avatar button */}
-            {user ? (
-              <button
-                className="md:hidden flex items-center gap-1.5 rounded-full border border-border bg-muted px-2 py-1 text-xs font-semibold"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Menu"
-              >
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shrink-0">
-                  {user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
-                </div>
-                <span className="max-w-[60px] truncate">Hello, {user.name.split(' ')[0]}</span>
-              </button>
-            ) : (
-              <button
-                className="md:hidden text-xs font-semibold text-primary border border-primary rounded-full px-3 py-1"
-                onClick={openLogin}
-              >
-                Login
-              </button>
-            )}
+            <div className="md:hidden flex items-center">
+              {user ? (
+                <UserMenu isMobile />
+              ) : (
+                <button
+                  className="text-xs font-semibold text-primary border border-primary rounded-full px-3 py-1"
+                  onClick={openLogin}
+                >
+                  Login
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -166,27 +159,6 @@ export function Header({ className }: { className?: string }) {
                 <X className="h-4 w-4" />
               </button>
             </form>
-          </div>
-        )}
-
-        {/* Mobile User Menu dropdown — shows when user icon tapped and logged in */}
-        {mobileMenuOpen && user && (
-          <div className="md:hidden border-t bg-background/95 backdrop-blur-xl px-4 py-3 space-y-2">
-            <Link href="/my-orders" onClick={() => setMobileMenuOpen(false)}>
-              <div className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-muted transition-colors">
-                <Package className="h-5 w-5 text-primary" />
-                <span className="font-medium text-sm">My Orders</span>
-              </div>
-            </Link>
-            <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
-              <div className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-muted transition-colors">
-                <User className="h-5 w-5 text-primary" />
-                <span className="font-medium text-sm">My Profile</span>
-              </div>
-            </Link>
-            <div className="pt-1 border-t">
-              <UserMenu />
-            </div>
           </div>
         )}
       </header>

@@ -14,26 +14,39 @@ import { Button } from '@/components/ui/button';
 import { User, LogOut, ShoppingBag, Settings, Truck } from 'lucide-react';
 import Link from 'next/link';
 
-export function UserMenu() {
+interface UserMenuProps {
+  isMobile?: boolean;
+}
+
+export function UserMenu({ isMobile }: UserMenuProps = {}) {
   const { user, logout } = useAuth();
 
   if (!user) return null;
 
   const initials = user.name
     .split(' ')
-    .map((n) => n[0])
+    .map((n: string) => n[0])
     .join('')
     .toUpperCase();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-auto gap-2 rounded-full border px-4 hover:bg-muted">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-            {initials}
-          </div>
-          <span className="hidden text-sm font-medium md:inline-block">Hi, {user.name.split(' ')[0]}</span>
-        </Button>
+        {isMobile ? (
+          <button className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-2 py-1 text-xs font-semibold focus:outline-none">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shrink-0">
+               {initials}
+            </div>
+            <span className="max-w-[60px] truncate">Hello, {user.name.split(' ')[0]}</span>
+          </button>
+        ) : (
+          <Button variant="ghost" className="relative h-10 w-auto gap-2 rounded-full border px-4 hover:bg-muted">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              {initials}
+            </div>
+            <span className="hidden text-sm font-medium md:inline-block">Hi, {user.name.split(' ')[0]}</span>
+          </Button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
