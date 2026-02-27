@@ -212,6 +212,7 @@ export default function ProfilePage() {
   }, [user]);
 
   const handleSaveProfile = async () => {
+    if (!user) return;
     if (!formData.name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
     try {

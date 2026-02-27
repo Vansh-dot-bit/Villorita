@@ -32,7 +32,7 @@ export function ProductForm({ product }: ProductFormProps) {
   // For simplicity, we'll just submit the form.
   
   return (
-    <form action={isEditing ? updateProductAction.bind(null, product.id) : createProductAction} className="space-y-6 max-w-2xl bg-white p-8 rounded-xl shadow-sm">
+    <form action={isEditing ? updateProductAction.bind(null, (product as any).id) : createProductAction} className="space-y-6 max-w-2xl bg-white p-8 rounded-xl shadow-sm">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="name">Product Name</Label>

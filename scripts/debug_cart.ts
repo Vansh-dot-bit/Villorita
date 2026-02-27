@@ -111,7 +111,7 @@ async function run() {
         const cartData = await cartRes.json();
         log(`✅ Current Cart Items: ${cartData.cart?.items?.length || 0}`);
         if(cartData.cart?.items?.length > 0) {
-            log('Items:', cartData.cart.items.map(i => `${i.product.name} (Qty: ${i.quantity})`).join(', '));
+            log('Items:', cartData.cart.items.map((i: any) => `${i.product.name} (Qty: ${i.quantity})`).join(', '));
         } else {
              log('❌ Cart is empty after adding item!');
         }

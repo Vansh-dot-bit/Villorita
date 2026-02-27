@@ -65,7 +65,7 @@ const CustomOrderSchema = new Schema<ICustomOrder>({
 });
 
 // Update timestamp on save
-CustomOrderSchema.pre('save', function(next) {
+CustomOrderSchema.pre('save', function(next: any) {
   this.updatedAt = new Date();
   next();
 });

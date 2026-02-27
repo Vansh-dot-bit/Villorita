@@ -3,7 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import Category from '@/models/Category';
 import { requireVendor } from '@/lib/auth';
 import { getStoreByVendorId } from '@/lib/stores';
-import { serializeCategory } from '@/lib/categories'; // Wait, serializeCategory is not exported. I'll just map it directly.
+
 
 export async function GET(request: NextRequest) {
   try {

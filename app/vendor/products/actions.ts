@@ -46,7 +46,7 @@ export async function vendorCreateProductAction(formData: FormData) {
     isActive: true,
     storeId,
     isCombo,
-  })
+  } as any)
 
   revalidatePath("/vendor/products")
   revalidatePath("/")
@@ -88,7 +88,7 @@ export async function vendorUpdateProductAction(id: string, formData: FormData) 
     costPrice: derivedCostPrice,
     weights,
     isCombo,
-  })
+  } as any)
 
   revalidatePath("/vendor/products")
   revalidatePath("/")

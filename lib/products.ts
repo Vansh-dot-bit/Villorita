@@ -10,7 +10,6 @@ function serializeProduct(product: any) {
     id: p._id.toString(),
     _id: p._id.toString(),
     createdAt: p.createdAt?.toISOString ? p.createdAt.toISOString() : p.createdAt,
-    createdAt: p.createdAt?.toISOString ? p.createdAt.toISOString() : p.createdAt,
     updatedAt: p.updatedAt?.toISOString ? p.updatedAt.toISOString() : p.updatedAt,
     isAvailable: p.isAvailable !== undefined ? p.isAvailable : true,
     weights: p.weights?.map((w: any) => ({
@@ -20,7 +19,6 @@ function serializeProduct(product: any) {
     reviews: p.reviews?.map((r: any) => ({
       ...r,
       _id: r._id ? r._id.toString() : undefined,
-      createdAt: r.createdAt?.toISOString ? r.createdAt.toISOString() : r.createdAt,
       createdAt: r.createdAt?.toISOString ? r.createdAt.toISOString() : r.createdAt,
     })) || [],
     isCombo: p.isCombo !== undefined ? p.isCombo : false,

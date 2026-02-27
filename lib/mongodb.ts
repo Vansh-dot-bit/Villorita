@@ -18,7 +18,7 @@ declare global {
 let cached = global.mongoose;
 
 if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null } as any;
 }
 
 async function dbConnect() {
@@ -33,7 +33,7 @@ async function dbConnect() {
 
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
       return mongoose;
-    });
+    }) as any;
   }
 
   try {

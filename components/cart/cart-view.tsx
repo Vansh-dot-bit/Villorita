@@ -89,7 +89,7 @@ export function CartView() {
       setLoadingCoupon(true)
       setCouponError("")
       
-      const result = await verifyCoupon(couponInput, cartTotal, user?.userId)
+      const result = await verifyCoupon(couponInput, cartTotal, user?.id)
       
       if (result.success) {
           setAppliedCoupon({ 
@@ -254,9 +254,9 @@ export function CartView() {
   };
 
   // Load script on mount
-  useState(() => {
+  useEffect(() => {
       loadRazorpay()
-  })
+  }, [])
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">

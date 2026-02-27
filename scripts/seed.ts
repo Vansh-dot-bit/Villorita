@@ -1,10 +1,10 @@
 // Database seed script to populate initial data
 // Run this with: node scripts/seed.js
 
-import dbConnect from '../lib/db.js';
-import User from '../models/User.js';
-import Product from '../models/Product.js';
-import Coupon from '../models/Coupon.js';
+import dbConnect from '../lib/mongodb';
+import User from '../models/User';
+import Product from '../models/Product';
+import Coupon from '../models/Coupon';
 import bcrypt from 'bcryptjs';
 
 async function seedDatabase() {

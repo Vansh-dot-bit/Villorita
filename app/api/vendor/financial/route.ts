@@ -12,13 +12,13 @@ export async function GET(request: Request) {
     await dbConnect();
     
     // Fetch vendor's store to get their cut percentage
-    const store = await Store.findOne({ vendorId: vendor.id });
+    const store = await Store.findOne({ vendorId: vendor.userId });
     const adminCutPercentage = store?.adminCutPercentage || 0;
     const vendorShareMultiplier = (100 - adminCutPercentage) / 100;
 
     // Find all delivered orders for THIS vendor
     const orders = await Order.find({ 
-      vendor: vendor.id,
+      vendor: vendor.userId,
       orderStatus: 'Delivered'
     }).sort({ createdAt: -1 });
 
@@ -31,16 +31,18 @@ export async function GET(request: Request) {
 
       for (const item of order.items) {
         // Calculate vendor revenue based on selling price and their cut
-        const itemSellingPriceTotal = item.price * item.quantity;
+        const price = item.price || 0;
+        const quantity = item.quantity || 0;
+        const itemSellingPriceTotal = price * quantity;
         const itemRevenue = itemSellingPriceTotal * vendorShareMultiplier;
         
         orderRevenue += itemRevenue;
 
         enrichedItems.push({
           name: item.name,
-          quantity: item.quantity,
+          quantity: quantity,
           weight: item.weight,
-          price: item.price,
+          price: price,
           adminCutPercentage,
           itemRevenue
         });
