@@ -3,21 +3,20 @@ import dbConnect from '@/lib/mongodb';
 import AddOn from '@/models/AddOn';
 import { requireAdmin } from '@/lib/auth';
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+type RouteParams = { params: Promise<{ id: string }> };
+
+export async function PUT(request: NextRequest, context: RouteParams) {
   try {
     const admin = requireAdmin(request);
     if (admin instanceof Response) return admin;
 
     const body = await request.json();
     await dbConnect();
-    
-    const { id } = await params;
+
+    const { id } = await context.params;
 
     const addon = await AddOn.findByIdAndUpdate(id, body, { new: true });
-    
+
     if (!addon) {
       return NextResponse.json({ error: 'Addon not found' }, { status: 404 });
     }
@@ -28,17 +27,14 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, context: RouteParams) {
   try {
     const admin = requireAdmin(request);
     if (admin instanceof Response) return admin;
 
     await dbConnect();
-    
-    const { id } = await params;
+
+    const { id } = await context.params;
     const addon = await AddOn.findByIdAndDelete(id);
 
     if (!addon) {
