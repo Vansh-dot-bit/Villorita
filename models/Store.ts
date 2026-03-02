@@ -11,6 +11,7 @@ export interface IStore extends Document {
   closesAt: string;
   isListedOnHome: boolean;
   isActive: boolean;
+  deliveryTime?: string;
   adminCutPercentage: number;
   createdAt: Date;
   updatedAt: Date;
@@ -65,6 +66,10 @@ const StoreSchema = new Schema<IStore>({
     default: 0,
     min: 0,
     max: 100
+  },
+  deliveryTime: {
+    type: String,
+    default: '',
   }
 }, { timestamps: true });
 

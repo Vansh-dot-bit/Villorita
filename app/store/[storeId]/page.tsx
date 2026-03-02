@@ -75,7 +75,17 @@ export default async function StorePage({ params }: { params: Promise<{ storeId:
                               </div>
                           </>
                       )}
+                      {store.deliveryTime && (
+                          <>
+                              <span className="text-gray-400">|</span>
+                              <div className="flex items-center gap-1.5 bg-purple-100 text-purple-800 px-2.5 py-1 rounded-full font-semibold">
+                                  <Clock className="h-3.5 w-3.5 shrink-0" />
+                                  <span>Delivery: {store.deliveryTime}</span>
+                              </div>
+                          </>
+                      )}
                   </div>
+
               </div>
           </div>
       </div>

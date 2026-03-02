@@ -92,6 +92,11 @@ export function StoreForm({ store, vendors }: StoreFormProps) {
         </div>
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="deliveryTime">Delivery Time (e.g. "30-45 min")</Label>
+        <Input id="deliveryTime" name="deliveryTime" placeholder="e.g. 30-45 min" defaultValue={store?.deliveryTime || ''} />
+      </div>
+
       <div className="space-y-4 border p-4 rounded-lg bg-indigo-50/50">
         <div className="space-y-1">
           <Label htmlFor="adminCutPercentage" className="text-base font-semibold text-indigo-900">Admin Cut Percentage (%)</Label>

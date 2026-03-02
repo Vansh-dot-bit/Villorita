@@ -23,6 +23,7 @@ export async function createStoreAction(formData: FormData) {
     description: formData.get('description') as string,
     isListedOnHome: formData.get('isListedOnHome') === 'true',
     adminCutPercentage: Number(formData.get('adminCutPercentage')),
+    deliveryTime: formData.get('deliveryTime') as string,
   }
 
   await Store.create(data)
@@ -45,6 +46,7 @@ export async function updateStoreAction(id: string, formData: FormData) {
     description: formData.get('description') as string,
     isListedOnHome: formData.get('isListedOnHome') === 'true',
     adminCutPercentage: Number(formData.get('adminCutPercentage')),
+    deliveryTime: formData.get('deliveryTime') as string,
   }
 
   await Store.findByIdAndUpdate(id, data)

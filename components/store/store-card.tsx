@@ -1,5 +1,5 @@
 import { Link } from "next-view-transitions"
-import { MapPin, Clock, Navigation } from "lucide-react"
+import { MapPin, Navigation } from "lucide-react"
 import { IStore as Store } from "@/models/Store"
 
 interface StoreCardProps {
