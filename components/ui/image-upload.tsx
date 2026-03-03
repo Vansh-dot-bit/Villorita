@@ -17,16 +17,16 @@ interface ImageUploadInputProps {
 
 /**
  * A drag-and-drop or click-to-upload image field that immediately uploads
- * the file to /api/upload/image and stores the returned path in a hidden
- * <input> so it's included transparently in any form submission.
+ * the file to /api/upload/image and stores the returned Cloudinary URL in a
+ * hidden <input> so it's included transparently in any form submission.
  */
 export function ImageUploadInput({ name, label = 'Image', defaultValue, onChange }: ImageUploadInputProps) {
-  // preview is what we show the user (data URL locally or the stored path)
+  // preview is what we show the user (data URL locally or the stored Cloudinary URL)
   const [preview, setPreview] = useState<string | null>(
     defaultValue
       ? defaultValue.startsWith('http')
-        ? defaultValue
-        : `/api/uploads/${defaultValue}`
+        ? defaultValue          // full Cloudinary URL — use directly
+        : `/api/uploads/${defaultValue}` // legacy local filename fallback
       : null
   )
   // storedValue is what gets submitted in the form
@@ -47,8 +47,10 @@ export function ImageUploadInput({ name, label = 'Image', defaultValue, onChange
       fd.append('file', file)
       const res = await fetch('/api/upload/image', { method: 'POST', body: fd })
       const data = await res.json()
+      // `data.path` is now a full Cloudinary https:// URL
       if (data.success && data.path) {
-        setStoredValue(data.path)
+        setStoredValue(data.path)   // full URL stored in the hidden input
+        setPreview(data.path)        // update preview to the Cloudinary URL (replace local blob)
         onChange?.(data.path)
       } else {
         setPreview(null)

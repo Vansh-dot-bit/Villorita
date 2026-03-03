@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 
 export const runtime = 'nodejs';
+
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,32 +15,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'Invalid file type. Only JPG, PNG, WEBP, GIF allowed.' }, { status: 400 });
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Only JPG, PNG, WEBP, GIF allowed.' },
+        { status: 400 }
+      );
     }
 
-    const maxSize = 10 * 1024 * 1024; // 10 MB
-    if (file.size > maxSize) {
-      return NextResponse.json({ error: 'File too large. Maximum size is 10 MB.' }, { status: 400 });
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 10 MB.' },
+        { status: 400 }
+      );
     }
 
-    // Generate unique filename
-    const ext = file.name.split('.').pop() || 'jpg';
-    const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-
-    // Save to public/uploads
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const filePath = path.join(uploadDir, uniqueName);
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
-    fs.writeFileSync(filePath, Buffer.from(bytes));
+    const buffer = Buffer.from(bytes);
 
-    // Return the stored path (relative, used as /api/uploads/<path>)
-    return NextResponse.json({ success: true, path: uniqueName });
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(buffer, {
+      folder: 'pur/images',
+      resource_type: 'image',
+    });
+
+    // Return the Cloudinary secure URL as `path` so existing callers (ImageUploadInput, store-form)
+    // that read `data.path` continue to work without any changes.
+    return NextResponse.json({
+      success: true,
+      path: result.secure_url,
+      url: result.secure_url,
+      public_id: result.public_id,
+    });
   } catch (error) {
     console.error('Image upload error:', error);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });

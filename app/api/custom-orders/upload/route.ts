@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 import { requireAuth } from '@/lib/auth';
+import { uploadToCloudinary } from '@/lib/cloudinary';
 
-// Allowed file types
-const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const runtime = 'nodejs';
+
+// Allowed file types (images + PDF)
+const ALLOWED_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'application/pdf',
+];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB (increased from 5 MB)
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,16 +23,13 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file uploaded' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Invalid file type. Only PNG, JPG, and PDF are allowed' },
+        { error: 'Invalid file type. Only PNG, JPG, WEBP, and PDF are allowed.' },
         { status: 400 }
       );
     }
@@ -33,46 +37,29 @@ export async function POST(request: NextRequest) {
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: 'File size exceeds 5MB limit' },
+        { error: 'File size exceeds 10 MB limit.' },
         { status: 400 }
       );
     }
 
-    // Create upload directory if it doesn't exist
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'custom-orders');
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (error) {
-      // Directory might already exist, ignore error
-    }
-
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const fileExtension = path.extname(file.name);
-    const filename = `${timestamp}-${randomString}${fileExtension}`;
-    const filepath = path.join(uploadDir, filename);
-
-    // Convert file to buffer and save
+    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filepath, buffer);
 
-    // Return public URL
-    const fileUrl = `/uploads/custom-orders/${filename}`;
+    // Upload to Cloudinary — use resource_type 'auto' so both images and PDFs are handled
+    const result = await uploadToCloudinary(buffer, {
+      folder: 'pur/custom-orders',
+      resource_type: 'auto',
+    });
 
     return NextResponse.json({
       success: true,
       message: 'File uploaded successfully',
-      fileUrl,
-      filename,
+      fileUrl: result.secure_url,
+      public_id: result.public_id,
     });
   } catch (error) {
     console.error('File upload error:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload file' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 }
-
