@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { LocationProvider } from "@/context/location-context";
 import { LocationModal } from "@/components/location/location-modal";
 import { GpsProvider } from "@/context/gps-context";
+import { SiteGate } from "@/components/layout/SiteGate";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -33,7 +34,9 @@ export default function RootLayout({
             <GpsProvider>
             <LocationProvider>
             <CartProvider>
+              <SiteGate>
                 {children}
+              </SiteGate>
                 <LocationModal />
                 <Toaster />
             </CartProvider>
