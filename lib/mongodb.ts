@@ -1,4 +1,9 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Force DNS resolution to use IPv4 over IPv6 to fix 'querySrv ECONNREFUSED'
+// on Windows dual-stack machines with Node >= 17
+dns.setDefaultResultOrder('ipv4first');
 
 const MONGODB_URI = process.env.MONGODB_URI;
 

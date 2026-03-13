@@ -33,6 +33,15 @@ const OrderSchema = new mongoose.Schema({
     image: String,
     quantity: Number,
     weight: String,
+    vendor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    vendorStatus: {
+      type: String,
+      enum: ['Pending', 'Accepted', 'Preparing', 'Ready'],
+      default: 'Pending',
+    },
   }],
   addons: [{
     addon: {
@@ -75,6 +84,14 @@ const OrderSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  appliedTaxes: { type: [{
+    name: String,
+    amount: Number
+  }], default: [] },
+  appliedCharges: { type: [{
+    name: String,
+    amount: Number
+  }], default: [] },
   totalAmount: {
     type: Number,
     required: true,
@@ -108,6 +125,12 @@ const OrderSchema = new mongoose.Schema({
   },
   deliveryDate: {
     type: Date,
+  },
+  makingTime: {
+    type: Number,
+  },
+  scheduledTime: {
+    type: String,
   },
   orderNotes: {
     type: String,
@@ -143,8 +166,12 @@ const OrderSchema = new mongoose.Schema({
   },
 });
 
+// Force model refresh if new fields are missing
 if (mongoose.models.Order) {
+  const schema = mongoose.models.Order.schema;
+  if (!schema.paths.makingTime || !schema.paths.scheduledTime || !schema.paths['items.vendor']) {
     delete mongoose.models.Order;
+  }
 }
 
-export default mongoose.model('Order', OrderSchema);
+export default mongoose.models.Order || mongoose.model('Order', OrderSchema);

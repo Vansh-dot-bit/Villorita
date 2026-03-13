@@ -17,13 +17,15 @@ export async function createStoreAction(formData: FormData) {
     vendorId: formData.get('vendorId') as string,
     photo: formData.get('photo') as string,
     address: formData.get('address') as string,
-    km: Number(formData.get('km')),
+    lat: formData.get('lat') ? Number(formData.get('lat')) : undefined,
+    lng: formData.get('lng') ? Number(formData.get('lng')) : undefined,
     opensAt: formData.get('opensAt') as string,
     closesAt: formData.get('closesAt') as string,
     description: formData.get('description') as string,
     isListedOnHome: formData.get('isListedOnHome') === 'true',
     adminCutPercentage: Number(formData.get('adminCutPercentage')),
     deliveryTime: formData.get('deliveryTime') as string,
+    rating: Number(formData.get('rating')) || 5,
   }
 
   await Store.create(data)
@@ -40,13 +42,15 @@ export async function updateStoreAction(id: string, formData: FormData) {
     vendorId: formData.get('vendorId') as string,
     photo: formData.get('photo') as string,
     address: formData.get('address') as string,
-    km: Number(formData.get('km')),
+    lat: formData.get('lat') ? Number(formData.get('lat')) : undefined,
+    lng: formData.get('lng') ? Number(formData.get('lng')) : undefined,
     opensAt: formData.get('opensAt') as string,
     closesAt: formData.get('closesAt') as string,
     description: formData.get('description') as string,
     isListedOnHome: formData.get('isListedOnHome') === 'true',
     adminCutPercentage: Number(formData.get('adminCutPercentage')),
     deliveryTime: formData.get('deliveryTime') as string,
+    rating: Number(formData.get('rating')) || 5,
   }
 
   await Store.findByIdAndUpdate(id, data)

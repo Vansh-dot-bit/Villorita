@@ -15,12 +15,12 @@ export default function AdminLayout({
       <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-white flex flex-col">
         <div className="px-6 py-6">
             <div className="flex items-center gap-2">
-                <div className="relative h-14 w-36">
+                <div className="relative h-12 w-36 rounded-xl overflow-hidden flex items-center justify-start">
                     <Image 
-                        src="/logo2.png" 
-                        alt="Purple Bite" 
+                        src="/logo.png" 
+                        alt="Villorita" 
                         fill 
-                        className="object-contain"
+                        className="object-contain object-left"
                     />
                 </div>
                 <span className="text-xl font-bold tracking-tight text-primary">Admin Panel</span>
@@ -44,7 +44,9 @@ export default function AdminLayout({
                     { name: "Stores", icon: StoreIcon, href: "/admin/stores" },
                     { name: "Applications", icon: ClipboardList, href: "/admin/applications" },
                     { name: "Content", icon: FileText, href: "/admin/content" },
-                    { name: "Delivery Fees", icon: MapPin, href: "/admin/delivery-fees" },
+                    { name: "Delivery Locations", icon: MapPin, href: "/admin/delivery-locations" },
+                    { name: "Delivery Charges", icon: Settings, href: "/admin/delivery-fees" },
+                    { name: "Taxes & Charges", icon: FileText, href: "/admin/taxes-charges" },
                     { name: "Settings", icon: Settings, href: "/admin/settings" },
                 ].map((item) => (
                     <Link 

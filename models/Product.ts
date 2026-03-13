@@ -16,6 +16,10 @@ const ProductSchema = new mongoose.Schema({
     required: [true, 'Price is required'],
     min: 0,
   },
+  cuttedPrice: {
+    type: Number,
+    min: 0,
+  },
   category: {
     type: String,
     required: [true, 'Category is required'],
@@ -50,6 +54,7 @@ const ProductSchema = new mongoose.Schema({
   weights: [{
     weight: String,
     price: Number,
+    cuttedPrice: Number,
   }],
   rating: {
     average: {
@@ -108,6 +113,7 @@ export interface IProduct extends mongoose.Document {
   name: string;
   description: string;
   price: number;
+  cuttedPrice?: number;
   category: string;
 
   image: string;
@@ -120,6 +126,7 @@ export interface IProduct extends mongoose.Document {
   weights: {
     weight: string;
     price: number;
+    cuttedPrice?: number;
   }[];
   rating: {
     average: number;
@@ -149,7 +156,8 @@ if (mongoose.models.Product) {
   const hasOldCostPrice = !!schema.paths.costPrice;
   const missingPrepTime = !schema.paths.preparingTime;
   const missingType = !schema.paths.type;
-  if (!schema.paths.isAvailable || !schema.paths.storeId || hasOldCostPrice || missingPrepTime || missingType) {
+  const missingCuttedPrice = !schema.paths.cuttedPrice;
+  if (!schema.paths.isAvailable || !schema.paths.storeId || hasOldCostPrice || missingPrepTime || missingType || missingCuttedPrice) {
       delete mongoose.models.Product;
   }
 }

@@ -35,6 +35,17 @@ export async function PATCH(
       order.updatedAt = new Date();
       await order.save();
 
+      // Send email to all active delivery agents
+      const User = (await import('@/models/User')).default;
+      // We look for delivery agents. If you rely on isVerified, include it.
+      const agents = await User.find({ role: 'delivery_agent' });
+      const agentEmails = agents.map(a => a.email).filter(Boolean);
+      if (agentEmails.length > 0) {
+          import('@/lib/mail').then(({ sendDeliveryAgentNotification }) => {
+              sendDeliveryAgentNotification(agentEmails, order._id.toString());
+          }).catch(e => console.error("Failed to load mail library", e));
+      }
+
       return NextResponse.json({
         success: true,
         message: 'Order sent to delivery agent for pickup',

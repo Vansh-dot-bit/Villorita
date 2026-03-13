@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+﻿/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect, useCallback } from "react";
@@ -150,7 +150,7 @@ export default function DeliveryAgentOrdersPage() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success('Order verified and marked as Delivered! 🎉');
+        toast.success('Order verified and marked as Delivered! ðŸŽ‰');
         setOtpDialogOpen(false);
         setOtpInput('');
         setSelectedOrderId(null);
@@ -287,9 +287,9 @@ export default function DeliveryAgentOrdersPage() {
                         #{order._id.toString().slice(-6).toUpperCase()}
                       </span>
                       <Badge className={`${STATUS_COLORS[order.orderStatus] || 'bg-gray-100 text-gray-600'} border-0 text-xs font-semibold`}>
-                        {order.orderStatus === 'Awaiting Agent' ? '⏳ Awaiting Pickup' :
-                         order.orderStatus === 'Out for Delivery' ? '🚚 Out for Delivery' :
-                         order.orderStatus === 'Delivered' ? '✅ Delivered' :
+                        {order.orderStatus === 'Awaiting Agent' ? 'â³ Awaiting Pickup' :
+                         order.orderStatus === 'Out for Delivery' ? 'ðŸšš Out for Delivery' :
+                         order.orderStatus === 'Delivered' ? 'âœ… Delivered' :
                          order.orderStatus}
                       </Badge>
                     </div>
@@ -298,6 +298,22 @@ export default function DeliveryAgentOrdersPage() {
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(order.createdAt), 'dd MMM, p')}
                       </p>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {(order as any).makingTime && (
+                          <span className="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full border border-purple-100 font-semibold">
+                            Making: {(order as any).makingTime} mins
+                          </span>
+                        )}
+                        {(order as any).scheduledTime ? (
+                          <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full border border-indigo-100 font-semibold">
+                            Sched: {(order as any).scheduledTime}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded-full border border-gray-100 font-semibold">
+                            No Schedule
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -466,7 +482,7 @@ export default function DeliveryAgentOrdersPage() {
               disabled={verifyingOtp || otpInput.length !== 6}
               className="bg-green-600 hover:bg-green-700"
             >
-              {verifyingOtp ? 'Verifying...' : '✓ Confirm Delivery'}
+              {verifyingOtp ? 'Verifying...' : 'âœ“ Confirm Delivery'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -66,36 +66,33 @@ export default async function Home() {
       </div>
 
       <main className="container mx-auto px-4 space-y-12 pb-12">
-        {/* Featured Stores Section */}
-        {stores.length > 0 && (
-            <section className="space-y-6 pt-2">
-                <div className="flex items-center justify-between px-2">
-                    <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Our Partners</h2>
-                        <p className="text-sm text-muted-foreground mt-1">Discover popular stores near you</p>
-                    </div>
-                </div>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-2">
-                    {stores.map((store: any) => (
-                        <StoreCard key={store.id} store={store} />
-                    ))}
-                </div>
-            </section>
-        )}
-
         {/* Dynamic Product Sections */}
         {sections.map((section) => (
-          <section key={section.id} className="space-y-6">
+          <section key={section.id} className="space-y-4">
             <div className="flex items-center justify-between px-2">
-              <h2 className="text-2xl font-bold tracking-tight">{section.title}</h2>
+              <h2 className="text-xl font-bold tracking-tight uppercase">{section.title}</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-2">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-3 px-2">
               {section.products.map((product: any) => (
                 <ProductCard key={product.id || product._id} product={product} />
               ))}
             </div>
           </section>
         ))}
+
+        {/* Featured Stores Section */}
+        {stores.length > 0 && (
+            <section className="space-y-4 pt-4">
+                <div className="flex items-center justify-between px-2">
+                    <h2 className="text-xl font-bold tracking-tight text-gray-800">Discover popular Bakeries near you</h2>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 px-2">
+                    {stores.map((store: any) => (
+                        <StoreCard key={store.id} store={store} />
+                    ))}
+                </div>
+            </section>
+        )}
       </main>
     </div>
     

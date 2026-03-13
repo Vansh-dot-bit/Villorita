@@ -14,6 +14,8 @@ export type CartItem = {
   image: string
   type: "Eggless" | "Contains Egg"
   selectedPrice: number
+  cuttedPrice?: number
+  storeId?: string // Link to store to compute GPS distance
 }
 
 export type CartAddon = {
@@ -101,7 +103,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 quantity: item.quantity,
                 image: item.image || item.product.image, // Fallback
                 type: item.product.type || "Eggless", // Fallback
-                selectedPrice: item.selectedPrice
+                selectedPrice: item.selectedPrice,
+                cuttedPrice: item.cuttedPrice || item.product.weights?.find((w: any) => w.weight === item.weight)?.cuttedPrice,
+                storeId: item.product.storeId || item.storeId
             }))
         setItems(backendItems)
         
@@ -248,7 +252,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                         quantity: item.quantity,
                         image: item.image || item.product.image,
                         type: item.product.type || "Eggless",
-                        selectedPrice: item.selectedPrice
+                        selectedPrice: item.selectedPrice,
+                        cuttedPrice: item.cuttedPrice || item.product.weights?.find((w: any) => w.weight === item.weight)?.cuttedPrice,
+                        storeId: item.product.storeId || item.storeId
                     }))
                  setItems(backendItems)
             }

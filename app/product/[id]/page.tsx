@@ -62,29 +62,47 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                             {product.description}
                         </p>
                         
-                        <div className="grid grid-cols-2 gap-3 md:gap-4 pt-4">
-                             <div className="flex items-center gap-3 rounded-2xl bg-secondary/50 p-2.5 md:p-3">
-                                <Clock className="h-5 w-5 text-primary shrink-0" />
-                                <div className="text-xs md:text-sm">
-                                    <p className="font-bold text-gray-900">30 Mins</p>
-                                    <p className="text-gray-500">Delivery</p>
+                        <div className="flex flex-wrap gap-2 pt-3">
+                            {/* Delivery Time Badge */}
+                            <div className="flex-1 min-w-[80px] flex flex-col items-center justify-center bg-blue-50 border border-blue-200 rounded-[12px] p-2 shadow-sm">
+                                <span className="text-[8px] sm:text-[9px] font-bold text-blue-600 uppercase tracking-wider mb-0.5">Delivery Time</span>
+                                <div className="flex items-center gap-1 text-blue-900">
+                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
+                                    <span className="text-xs sm:text-sm font-extrabold">{(product as any).store?.deliveryTime || "45"} Mins</span>
                                 </div>
-                             </div>
-                             <div className="flex items-center gap-3 rounded-2xl bg-secondary/50 p-2.5 md:p-3">
-                                <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-                                <div className="text-xs md:text-sm">
-                                    <p className="font-bold text-gray-900">100% Safe</p>
-                                    <p className="text-gray-500">Certified</p>
+                            </div>
+
+                            {/* Making Time Badge */}
+                            <div className="flex-1 min-w-[80px] flex flex-col items-center justify-center bg-purple-50 border border-purple-200 rounded-[12px] p-2 shadow-sm">
+                                <span className="text-[8px] sm:text-[9px] font-bold text-purple-600 uppercase tracking-wider mb-0.5">Making Time</span>
+                                <div className="flex items-center gap-1 text-purple-900">
+                                    <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-purple-600" />
+                                    <span className="text-xs sm:text-sm font-extrabold">{(product as any).preparingTime || "60"} Mins</span>
                                 </div>
-                             </div>
+                            </div>
+
+                            {/* Safe Certified Badge */}
+                            <div className="flex-1 min-w-[80px] flex flex-col items-center justify-center bg-green-50 border border-green-200 rounded-[12px] p-2 shadow-sm">
+                                <span className="text-[8px] sm:text-[9px] font-bold text-green-600 uppercase tracking-wider mb-0.5">100% Safe</span>
+                                <div className="flex items-center gap-1 text-green-900">
+                                    <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600" />
+                                    <span className="text-xs sm:text-sm font-extrabold">Certified</span>
+                                </div>
+                            </div>
                         </div>
                      </div>
 
                      <div className="rounded-3xl bg-white p-5 md:p-6 shadow-sm border border-gray-50">
-                        <div className="mb-5 flex items-end gap-2">
-                            <span className="text-3xl font-bold text-gray-900">₹{product.price}</span>
-                            <span className="text-lg text-gray-400 line-through mb-0.5">₹{product.price + 200}</span>
-                            <span className="mb-1.5 ml-auto text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">20% OFF</span>
+                        <div className="mb-5 flex flex-wrap items-end gap-2">
+                            <span className="text-3xl font-extrabold text-gray-900 tracking-tight">₹{product.price}</span>
+                            {product.cuttedPrice && product.cuttedPrice > product.price && (
+                                <>
+                                    <span className="text-lg text-gray-400 line-through mb-1 font-medium italic">₹{product.cuttedPrice}</span>
+                                    <span className="mb-2 ml-auto text-xs font-black text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100 uppercase tracking-wider">
+                                        {Math.round(((product.cuttedPrice - product.price) / product.cuttedPrice) * 100)}% OFF
+                                    </span>
+                                </>
+                            )}
                         </div>
                         
                         {/* @ts-ignore */}

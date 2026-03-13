@@ -21,74 +21,74 @@ export function ProductCard({ product }: { product: Product & { id?: string, _id
       quantity: 1,
       image: product.image,
       type: product.type === "Eggless" ? "Eggless" : "Contains Egg",
-      selectedPrice: product.price
+      selectedPrice: product.price,
+      storeId: product.storeId ? String(product.storeId) : undefined
     })
   }
 
   const isEggless = product.type === "Eggless"
 
   return (
-    <Link href={`/product/${product.id || product._id}`} className="block h-full">
-      {/* Perfect square card */}
-      <div className="relative aspect-square w-full rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-white group cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md flex flex-col">
-
-        {/* Image — Flex 1 to take remaining space */}
-        <div className="relative flex-1 w-full bg-muted overflow-hidden">
-          {product.image ? (
-            <img
-              src={product.image.startsWith('http') ? product.image : `/api/uploads/${product.image}`}
-              alt={product.name}
-              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-            />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center text-muted-foreground/20 text-4xl font-bold uppercase tracking-widest">
-              {product.name.split(' ')[0]}
-            </div>
-          )}
-          
-          {/* Rating badge on top-right of image */}
-          <div className="absolute top-2 right-2 flex items-center gap-0.5 rounded-lg bg-green-500/90 backdrop-blur-sm px-1.5 py-0.5 text-[10px] font-bold text-white shadow">
-            {typeof product.rating === 'object' ? product.rating.average : product.rating || 0}
-            <Star className="h-2.5 w-2.5 fill-current ml-0.5" />
+    <Link href={`/product/${product.id || product._id}`} className="flex flex-col gap-1.5 h-full group">
+      {/* The Card (Image + Rating + Egg indicator) */}
+      <div className="relative aspect-square w-full rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-muted cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md">
+        {/* Image */}
+        {product.image ? (
+          <img
+            src={product.image.startsWith('http') ? product.image : `/api/uploads/${product.image}`}
+            alt={product.name}
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          />
+        ) : (
+          <div className="h-full w-full flex items-center justify-center text-muted-foreground/20 text-xl md:text-2xl font-bold uppercase tracking-widest">
+            {product.name.substring(0, 2)}
           </div>
+        )}
+        
+        {/* Rating badge */}
+        <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded-md bg-green-500/90 backdrop-blur-sm px-1 py-0.5 text-[9px] font-bold text-white shadow">
+          {typeof product.rating === 'object' ? product.rating.average : product.rating || 0}
+          <Star className="h-2 w-2 fill-current ml-[1px]" />
         </div>
 
-        {/* Info strip — auto height, shrink-0 */}
-        <div className="bg-white px-2.5 pt-2 pb-2.5 flex flex-col gap-1.5 shrink-0 z-10">
+        {/* Indicators at bottom */}
+        <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between">
+          <div 
+            className={`h-2.5 w-2.5 rounded-full shadow-sm border border-white ${isEggless ? 'bg-green-500' : 'bg-red-500'}`} 
+            title={isEggless ? 'Eggless' : 'Contains Egg'}
+          />
+        </div>
+      </div>
 
-          {/* Row 1: Name (left) */}
-          <p className="font-bold text-[11px] sm:text-xs leading-tight line-clamp-1 text-gray-900">
-            {product.name}
-          </p>
+      {/* Outside info: Name, Price, and Add Button */}
+      <div className="flex flex-col gap-0.5 px-0.5 flex-1 justify-between">
+        <p className="font-semibold text-[10px] sm:text-xs leading-tight line-clamp-2 text-gray-800">
+          {product.name}
+        </p>
 
-          {/* Row 2: Egg type (left) + prep time (right) */}
-          <div className="flex items-center justify-between gap-1">
-            <span className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isEggless ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'}`}>
-              {isEggless ? '🟢 Eggless' : '🔴 Egg'}
-            </span>
-            {(product as any).preparingTime > 0 && (
-              <span className="text-[9px] sm:text-[10px] font-medium text-blue-600 flex items-center gap-0.5">
-                <Clock className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
-                {(product as any).preparingTime}m
-              </span>
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex flex-col">
+            <span className="text-xs sm:text-sm font-extrabold text-gray-900">₹{product.price}</span>
+            {product.cuttedPrice && product.cuttedPrice > product.price && (
+              <div className="flex items-center gap-1">
+                <span className="text-[8px] sm:text-[10px] text-gray-400 line-through">₹{product.cuttedPrice}</span>
+                <span className="text-[8px] sm:text-[10px] text-green-600 font-bold uppercase tracking-tighter">
+                  {Math.round(((product.cuttedPrice - product.price) / product.cuttedPrice) * 100)}% OFF
+                </span>
+              </div>
             )}
           </div>
-
-          {/* Row 3: Price (left) + Add button (right) */}
-          <div className="flex items-center justify-between mt-0.5">
-            <span className="text-sm font-extrabold text-gray-900">₹{product.price}</span>
-            {product.isAvailable === false ? (
-              <span className="text-[9px] text-gray-400 font-semibold px-2">Unavailable</span>
-            ) : (
-              <button
-                onClick={handleAddToCart}
-                className="flex items-center gap-0.5 bg-primary text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full hover:bg-primary/90 transition-colors"
-                title="Add to cart"
-              >
-                Add <ShoppingBag className="h-2.5 w-2.5 ml-0.5" />
-              </button>
-            )}
-          </div>
+          {product.isAvailable === false ? (
+            <span className="text-[9px] text-red-500 font-semibold">Unavailable</span>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="flex items-center justify-center h-6 w-6 sm:h-7 sm:w-7 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors shadow-sm shrink-0"
+              title="Add to cart"
+            >
+              <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </Link>

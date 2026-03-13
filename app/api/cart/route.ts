@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[API_CART_POST] Request body:', body);
-    const { productId, quantity = 1, weight = '1kg' } = body;
+    const { productId, quantity = 1, weight = '1kg', storeId } = body;
     console.log(`[API_CART_POST] Adding item: ProductID=${productId}, Qty=${quantity}, UserID=${user.userId}`);
 
     if (!productId) {
@@ -128,6 +128,8 @@ export async function POST(request: NextRequest) {
         quantity,
         weight,
         selectedPrice,
+        cuttedPrice: product.weights?.find((w: any) => w.weight === weight)?.cuttedPrice || product.cuttedPrice,
+        storeId: storeId || product.storeId,
       });
     }
 

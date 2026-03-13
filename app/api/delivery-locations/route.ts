@@ -19,11 +19,11 @@ export async function POST(request: Request) {
     if (user instanceof Response) return user;
 
     await dbConnect();
-    const { name, fee } = await request.json();
+    const { name } = await request.json();
 
     if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
 
-    const location = await DeliveryLocation.create({ name, fee: Number(fee) });
+    const location = await DeliveryLocation.create({ name });
     return NextResponse.json({ success: true, location });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to create location' }, { status: 500 });

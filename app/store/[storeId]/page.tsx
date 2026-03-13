@@ -5,6 +5,8 @@ import Product from "@/models/Product"
 import { notFound } from "next/navigation"
 import { Header } from "@/components/layout/header"
 import { StoreProducts } from "@/components/store/store-products"
+import { StoreUnavailableBanner } from "@/components/store/store-unavailable-banner"
+import { StoreDistanceBadge } from "@/components/store/store-distance-badge"
 import { MapPin, Clock, Navigation } from "lucide-react"
 
 export const revalidate = 60; // Revalidate every 60s
@@ -33,6 +35,8 @@ export default async function StorePage({ params }: { params: Promise<{ storeId:
 
   return (
     <div className="min-h-screen bg-gray-50/50">
+      {/* Show unavailable overlay if vendor closed the store */}
+      {!store.isActive && <StoreUnavailableBanner storeName={store.name} />}
       <Header />
       
       {/* Store Banner & Info */}
@@ -66,14 +70,8 @@ export default async function StorePage({ params }: { params: Promise<{ storeId:
                           <Clock className="h-4 w-4 shrink-0" />
                           <span>{store.opensAt} - {store.closesAt}</span>
                       </div>
-                      {store.km && (
-                          <>
-                              <span className="text-gray-400">|</span>
-                              <div className="flex items-center gap-1.5 text-black">
-                                  <Navigation className="h-4 w-4 shrink-0" />
-                                  <span>{store.km} km</span>
-                              </div>
-                          </>
+                      {store.lat != null && store.lng != null && (
+                          <StoreDistanceBadge lat={store.lat} lng={store.lng} />
                       )}
                       {store.deliveryTime && (
                           <>

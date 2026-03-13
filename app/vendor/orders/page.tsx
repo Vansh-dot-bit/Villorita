@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+﻿/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect } from "react";
@@ -183,16 +183,28 @@ export default function VendorOrdersPage() {
                                       <p className="text-sm text-muted-foreground">
                                           Placed on {format(new Date(order.createdAt), "PPP 'at' p")}
                                       </p>
+                                       <div className="flex flex-wrap gap-1.5 mt-1">
+                                           {order.makingTime && (
+                                               <span className="text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full border border-purple-100 font-semibold">
+                                                   Making: {order.makingTime} mins
+                                               </span>
+                                           )}
+                                           {order.scheduledTime ? (
+                                               <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-100 font-semibold">
+                                                   Scheduled: {order.scheduledTime}
+                                               </span>
+                                           ) : (
+                                               <span className="text-[10px] bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full border border-gray-100 font-semibold">
+                                                   No Schedule (ASAP)
+                                               </span>
+                                           )}
+                                       </div>
                                   </div>
 
                                   {/* Customer Info */}
                                   <div className="flex items-center gap-4 text-sm">
                                       <div className="text-right">
                                           <p className="font-medium">{order.shippingAddress?.name || order.user?.name}</p>
-                                          <div className="flex items-center gap-1 justify-end text-muted-foreground">
-                                              <Phone className="h-3 w-3" />
-                                              <span>{order.shippingAddress?.phone}</span>
-                                          </div>
                                       </div>
                                   </div>
                               </div>
@@ -308,7 +320,7 @@ export default function VendorOrdersPage() {
 
                                       {order.orderStatus === 'Awaiting Agent' && (
                                           <div className="w-full mt-2 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 text-sm text-amber-700 text-center font-medium">
-                                            ⏳ Waiting for delivery agent to accept
+                                            â³ Waiting for delivery agent to accept
                                           </div>
                                       )}
                                   </div>

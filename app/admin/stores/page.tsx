@@ -36,7 +36,7 @@ export default async function AdminStoresPage() {
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Photo</th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Vendor</th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Distance (km)</th>
+                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">GPS Coords</th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Timings</th>
                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Listed on Home</th>
                 <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
@@ -68,7 +68,11 @@ export default async function AdminStoresPage() {
                     {store.vendorId?.name || 'Unknown'} <br/>
                     <span className="text-xs text-muted-foreground">{store.vendorId?.email}</span>
                   </td>
-                  <td className="p-4 align-middle">{store.km} km</td>
+                  <td className="p-4 align-middle text-xs font-mono text-gray-500">
+                    {(store as any).lat && (store as any).lng
+                      ? `${(store as any).lat.toFixed(4)}, ${(store as any).lng.toFixed(4)}`
+                      : <span className="text-orange-500">Not set</span>}
+                  </td>
                   <td className="p-4 align-middle text-xs">
                     {store.opensAt} - {store.closesAt}
                   </td>

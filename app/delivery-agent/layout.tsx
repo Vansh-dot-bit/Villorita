@@ -46,12 +46,12 @@ export default function DeliveryAgentLayout({
       <aside className="w-64 bg-white border-r shadow-sm hidden md:flex flex-col">
         <div className="p-6 border-b">
           <Link href="/delivery-agent" className="flex items-center gap-2 font-bold text-xl text-orange-600">
-            <div className="relative h-14 w-36">
+            <div className="relative h-12 w-36 rounded-xl overflow-hidden flex items-center justify-start">
               <Image 
-                src="/logo2.png" 
-                alt="Purple Bite" 
+                src="/logo.png" 
+                alt="Villorita" 
                 fill 
-                className="object-contain"
+                className="object-contain object-left"
               />
             </div>
             <span className="text-sm font-semibold">Delivery Panel</span>

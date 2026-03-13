@@ -6,8 +6,9 @@ export async function GET(request: NextRequest) {
   try {
     await dbConnect();
 
-    // Fetch stores that are active and listed on home
-    const stores = await Store.find({ isActive: true, isListedOnHome: true })
+    // Fetch all stores listed on home, including unavailable ones.
+    // The StoreUnavailableBanner on the store page handles the UI for closed stores.
+    const stores = await Store.find({ isListedOnHome: true })
       .sort({ createdAt: -1 });
     
     return NextResponse.json({ success: true, stores });

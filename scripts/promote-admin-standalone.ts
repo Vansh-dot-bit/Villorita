@@ -1,7 +1,10 @@
-
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
+import dns from 'dns';
+
+// Force DNS resolution to use IPv4 over IPv6
+dns.setDefaultResultOrder('ipv4first');
 
 // Load env vars manually
 try {

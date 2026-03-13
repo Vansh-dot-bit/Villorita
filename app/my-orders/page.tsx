@@ -74,6 +74,24 @@ function OrderCard({ order, isCancelled = false, onCancelSuccess }: { order: any
                             <span className="font-mono text-lg tracking-widest font-bold ml-1">{order.otp}</span>
                         </div>
                     )}
+                    {/* Making Time & Scheduled Time */}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        {order.makingTime && (
+                            <span className="text-xs bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-100 font-medium">
+                                🍰 Making Time: {order.makingTime} mins
+                            </span>
+                        )}
+                        {order.scheduledTime && (
+                            <span className="text-xs bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full border border-indigo-100 font-medium">
+                                📅 Scheduled: {order.scheduledTime}
+                            </span>
+                        )}
+                        {!order.scheduledTime && (
+                            <span className="text-xs bg-gray-50 text-gray-500 px-2.5 py-1 rounded-full border border-gray-100 font-medium">
+                                🕐 No Schedule (ASAP)
+                            </span>
+                        )}
+                    </div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${

@@ -6,10 +6,13 @@ import Cart from '@/models/Cart';
 import Coupon from '@/models/Coupon';
 import User from '@/models/User';
 import Store from '@/models/Store';
+import DeliverySettings from '@/models/DeliverySettings';
 import DeliveryLocation from '@/models/DeliveryLocation';
 import WalletCashbackRequest from '@/models/WalletCashbackRequest';
+import Fee from '@/models/Fee';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 import { sendOrderConfirmationEmail } from '@/lib/mail';
+import { calculateDeliveryCharge } from '@/lib/deliveryCharge';
 
 // Helper function to generate 6-digit OTP
 function generateOTP(): string {
@@ -35,9 +38,9 @@ export async function POST(request: NextRequest) {
       occasionName,
       cakeMessage,
       paymentDetails, // { razorpay_order_id, razorpay_payment_id, razorpay_signature }
-      locationId,
       useWallet,
-      walletUsed
+      walletUsed,
+      scheduledTime // User-selected delivery time slot
     } = body;
 
     // Validate shipping address
@@ -48,6 +51,18 @@ export async function POST(request: NextRequest) {
         { error: 'Complete shipping address is required' },
         { status: 400 }
       );
+    }
+
+    // Validate delivery serviceability
+    const city = shippingAddress.city.toLowerCase().trim();
+    const activeLocations = await DeliveryLocation.find({ isActive: true });
+    const allowedCityNames = activeLocations.map(loc => loc.name.toLowerCase().trim());
+    
+    if (!allowedCityNames.includes(city)) {
+        return NextResponse.json(
+            { error: `Sorry, delivery is not available in ${shippingAddress.city}` },
+            { status: 400 }
+        );
     }
 
     // Get user's cart
@@ -107,34 +122,60 @@ export async function POST(request: NextRequest) {
       } else {
         // Calculate discount for regular coupons
         if (coupon.discountType === 'percentage') {
-          discount = (subtotal * coupon.discountValue) / 100;
+          discount = (itemsTotal * coupon.discountValue) / 100;
           if (coupon.maxDiscount) {
             discount = Math.min(discount, coupon.maxDiscount);
           }
+          discount = Math.min(discount, subtotal);
+          discount = Math.round(discount);
         } else {
-          discount = coupon.discountValue;
+          discount = Math.min(coupon.discountValue, subtotal);
         }
       }
       
       couponId = coupon._id;
     }
 
-    // Calculate delivery charge
-    let deliveryCharge = 0;
-    if (locationId) {
-        const location = await DeliveryLocation.findById(locationId);
-        if (location) {
-            deliveryCharge = location.fee;
-        } else {
-             // Fallback
-             deliveryCharge = subtotal >= 500 ? 0 : 50; 
-        }
-    } else {
-         // Fallback
-         deliveryCharge = subtotal >= 500 ? 0 : 50;
-    }
+    // ── Admin-controlled Delivery Charge ──────────────────────────────────────
+    // Use the GPS-computed distance sent from the frontend cart
+    const deliveryStoreKm = typeof body.distanceKm === 'number' ? body.distanceKm : 0;
+    const deliverySettingsDoc = await DeliverySettings.findOne();
+    const deliveryCharge = calculateDeliveryCharge(deliverySettingsDoc, deliveryStoreKm);
+    console.log(`[API_ORDERS] GPS distanceKm=${deliveryStoreKm}, deliveryCharge=${deliveryCharge}`);
+    // ─────────────────────────────────────────────────────────────────────────
 
-    const totalAmount = subtotal - discount + deliveryCharge;
+    // ── Custom Taxes & Charges ──
+    const activeFees = await Fee.find({ isActive: true });
+    let totalCustomCharges = 0;
+    let totalCustomTaxes = 0;
+    const appliedTaxes: { name: string, amount: number }[] = [];
+    const appliedCharges: { name: string, amount: number }[] = [];
+
+    activeFees.forEach(fee => {
+        if (fee.type === 'charge') {
+             totalCustomCharges += fee.value;
+             appliedCharges.push({ name: fee.name, amount: fee.value });
+        } else if (fee.type === 'tax') {
+            let taxBaseValue = 0;
+            if (fee.applicableOn.includes('subtotal')) taxBaseValue += itemsTotal; // Fix: avoid subtotal which already includes addonsTotal
+            if (fee.applicableOn.includes('delivery')) taxBaseValue += deliveryCharge;
+            if (fee.applicableOn.includes('addons')) taxBaseValue += addonsTotal;
+            
+            // Deduct coupon discount proportionally (assuming discount applies to subtotal + addons mainly)
+            // Simple approximation: if discount exists, subtract it from the total taxBaseValue if it exceeds it.
+            const effectiveDiscount = discount;
+            const effectiveTaxBase = Math.max(0, taxBaseValue - effectiveDiscount);
+
+            const taxAmount = Math.round((effectiveTaxBase * fee.value) / 100);
+            if (taxAmount > 0) {
+               totalCustomTaxes += taxAmount;
+               appliedTaxes.push({ name: `${fee.name} (${fee.value}%)`, amount: taxAmount });
+            }
+        }
+    });
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const totalAmount = subtotal - discount + deliveryCharge + totalCustomCharges + totalCustomTaxes;
     
     // Wallet handling
     let actualWalletUsed = 0;
@@ -224,6 +265,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Calculate making time from the first cart item's preparingTime
+    const makingTime = (() => {
+      for (const item of cart.items) {
+        const prepTime = (item.product as any)?.preparingTime;
+        if (prepTime !== undefined && prepTime !== null) {
+          return Number(prepTime);
+        }
+      }
+      return 60; // fallback default
+    })();
+
     // Create order
     const order = await Order.create({
       user: user.userId,
@@ -248,11 +300,15 @@ export async function POST(request: NextRequest) {
       discount,
       couponCode: couponCode?.toUpperCase(),
       deliveryCharge,
+      appliedTaxes,
+      appliedCharges,
       walletUsed: actualWalletUsed,
       walletCashback, // Store wallet cashback amount in order
       totalAmount: totalAmount - actualWalletUsed,
       paymentMethod,
       deliveryDate: deliveryDate || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Default 2 days
+      makingTime,
+      scheduledTime: scheduledTime || null,
       orderNotes,
       occasion,
       occasionName,

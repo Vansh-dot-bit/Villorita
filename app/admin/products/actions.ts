@@ -24,8 +24,10 @@ export async function createProductAction(formData: FormData) {
 
   // Auto-set main price from first weight if available
   let derivedPrice = price;
+  let derivedCuttedPrice;
   if (weights.length > 0) {
       derivedPrice = weights[0].price;
+      derivedCuttedPrice = weights[0].cuttedPrice;
   }
 
   if (!name || !category) {
@@ -41,6 +43,7 @@ export async function createProductAction(formData: FormData) {
     description,
     preparingTime,
     weights,
+    cuttedPrice: derivedCuttedPrice,
     rating: {
       average: ratingAvg,
       count: 0
@@ -88,6 +91,7 @@ export async function updateProductAction(id: string, formData: FormData) {
     description,
     preparingTime,
     weights,
+    cuttedPrice: derivedCuttedPrice,
     rating: {
       average: ratingAvg,
       count: ratingCount

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { MapPin, Gift, Tag, ChevronDown, Trash2, ShoppingBag, Wallet } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { MapPin, Gift, Tag, ChevronDown, Trash2, ShoppingBag, Wallet, Truck, Info, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input, Textarea } from "@/components/ui/input"
@@ -15,6 +15,8 @@ import {
 import { useCart } from "@/context/cart-context"
 import { useLocation } from "@/context/location-context"
 import { useAuth } from "@/context/auth-context"
+import { useGps } from "@/context/gps-context"
+import { getDistanceKm } from "@/lib/haversine"
 import { useRouter } from "next/navigation"
 
 import { verifyCoupon } from "@/app/actions/coupon"
@@ -38,11 +40,80 @@ export function CartView() {
   const [selectedAddonId, setSelectedAddonId] = useState("")
   const [addonQuantity, setAddonQuantity] = useState(1)
 
+  // ── Admin Delivery Settings ────────────────────────────────────────────────
+  // ── Admin Delivery Settings ────────────────────────────────────────────────
+  const { userLat, userLng, isLocationServiceable, resolvedAddress, permissionStatus, requestLocation, setManualPromptOpen } = useGps()
+  const [deliverySettings, setDeliverySettings] = useState<any>(null)
+  const [activeFees, setActiveFees] = useState<any[]>([])
+  const [storeLat, setStoreLat] = useState<number | null>(null)
+  const [storeLng, setStoreLng] = useState<number | null>(null)
+
   useEffect(() => {
-    fetch('/api/addons').then(r => r.json()).then(d => {
-      if (d.success) setAvailableAddons(d.addons.filter((a: any) => a.isActive))
-    })
+    // Fetch delivery settings and custom fees
+    Promise.all([
+        fetch('/api/admin/delivery-settings').then(r => r.json()),
+        fetch('/api/admin/fees').then(r => r.json()),
+        fetch('/api/addons').then(r => r.json())
+    ]).then(([d, f, a]) => {
+        if (d.success) setDeliverySettings(d.settings);
+        if (f.success) setActiveFees(f.fees.filter((fee: any) => fee.isActive));
+        if (a.success) setAvailableAddons(a.addons.filter((addon: any) => addon.isActive));
+    }).catch(() => {})
   }, [])
+
+  // Resolve store lat/lng from first cart item's product storeId
+  useEffect(() => {
+    const fetchStoreCoords = async () => {
+      for (const item of items) {
+        const storeId = (item as any).storeId
+        if (storeId) {
+          try {
+            const res = await fetch(`/api/stores/${storeId}`)
+            const data = await res.json()
+            if (data.success && data.store?.lat != null && data.store?.lng != null) {
+              setStoreLat(data.store.lat)
+              setStoreLng(data.store.lng)
+            }
+          } catch (_) {}
+          break
+        }
+      }
+    }
+    if (items.length > 0) fetchStoreCoords()
+  }, [items])
+
+  // Compute real GPS distance (km) between user and store
+  const storeKm = useMemo(() => {
+    if (userLat != null && userLng != null && storeLat != null && storeLng != null) {
+      return getDistanceKm(userLat, userLng, storeLat, storeLng)
+    }
+    return 0
+  }, [userLat, userLng, storeLat, storeLng])
+
+  // Compute delivery charge from admin settings
+  const computeDeliveryCharge = (settings: any, km: number) => {
+    if (!settings || !settings.isActive) return 0
+    const base = settings.baseFee ?? 0
+    const perKm = (settings.perKmCharge ?? 0) * km
+    const surge = settings.highDemandSurcharge ?? 0
+    const extra = settings.extraFee ?? 0
+    return Math.round(base + perKm + surge + extra)
+  }
+
+  const getDeliveryBreakdown = (settings: any, km: number) => {
+    if (!settings || !settings.isActive) return []
+    const rows: { label: string; amount: number }[] = []
+    
+    if (settings.baseFee > 0) rows.push({ label: 'Base Delivery Fee', amount: settings.baseFee })
+    
+    const roundedKm = Math.round(km * 10) / 10
+    const perKmAmt = Math.round((settings.perKmCharge ?? 0) * km)
+    if (perKmAmt > 0) rows.push({ label: `Distance (${roundedKm} km × ₹${settings.perKmCharge}/km)`, amount: perKmAmt })
+    if (settings.highDemandSurcharge > 0) rows.push({ label: 'High Demand Surcharge', amount: settings.highDemandSurcharge })
+    if (settings.extraFee > 0) rows.push({ label: settings.extraFeeLabel || 'Extra Fee', amount: settings.extraFee })
+    return rows
+  }
+  // ──────────────────────────────────────────────────────────────────────────
   
   // Address State
   const [addressDetails, setAddressDetails] = useState({
@@ -64,6 +135,16 @@ export function CartView() {
       }
   })
 
+  // Auto-fill City if resolvedAddress changes and city is empty
+  useEffect(() => {
+      if (resolvedAddress && !addressDetails.city) {
+          // resolvedAddress often has format "Specific Area, City". Try to extract City
+          const parts = resolvedAddress.split(',');
+          const cityPart = parts.length > 1 ? parts[parts.length - 1].trim() : parts[0].trim();
+          setAddressDetails(prev => ({ ...prev, city: cityPart }));
+      }
+  }, [resolvedAddress]);
+
   const [couponInput, setCouponInput] = useState("")
   const [loadingCoupon, setLoadingCoupon] = useState(false)
   const [couponError, setCouponError] = useState("")
@@ -74,22 +155,57 @@ export function CartView() {
   const walletBalance = user?.walletBalance || 0
   
   // Dynamic calculation
-  const deliveryCharge = selectedLocation ? selectedLocation.fee : 0
+  const deliveryCharge = computeDeliveryCharge(deliverySettings, storeKm)
+  const deliveryBreakdown = getDeliveryBreakdown(deliverySettings, storeKm)
   const discount = 0 
   const couponDiscount = appliedCoupon ? appliedCoupon.discount : 0
   const walletCashback = appliedCoupon?.walletCashback || 0
-  const extraCharges = 0
   
+  // ── Compute Custom Taxes & Charges ──
+  const computedDetails = useMemo(() => {
+     let totalCharges = 0;
+     let totalTaxes = 0;
+     const appliedChargesList: { name: string, amount: number, description: string }[] = [];
+     const appliedTaxesList: { name: string, amount: number, description: string }[] = [];
+
+     activeFees.forEach(fee => {
+         if (fee.type === 'charge') {
+             totalCharges += fee.value;
+             appliedChargesList.push({ name: fee.name, amount: fee.value, description: fee.description });
+         } else if (fee.type === 'tax') {
+             // Calculate base value based on applicableOn components
+             let taxBaseValue = 0;
+             if (fee.applicableOn.includes('subtotal')) taxBaseValue += cartTotal;
+             if (fee.applicableOn.includes('delivery')) taxBaseValue += deliveryCharge;
+             if (fee.applicableOn.includes('addons')) taxBaseValue += addonTotal;
+             
+             // Deduct coupon discount proportionally (assuming discount applies to subtotal + addons mainly)
+             // Simple approximation: if discount exists, subtract it from the total taxBaseValue if it exceeds it.
+             const effectiveDiscount = discount + couponDiscount;
+             const effectiveTaxBase = Math.max(0, taxBaseValue - effectiveDiscount);
+
+             const taxAmount = Math.round((effectiveTaxBase * fee.value) / 100);
+             if (taxAmount > 0) {
+                 totalTaxes += taxAmount;
+                 appliedTaxesList.push({ name: `${fee.name} (${fee.value}%)`, amount: taxAmount, description: fee.description });
+             }
+         }
+     });
+
+     return { totalCharges, totalTaxes, appliedChargesList, appliedTaxesList };
+  }, [activeFees, cartTotal, addonTotal, deliveryCharge]);
+
   // Calculate wallet deduction (wallet cashback doesn't reduce cart price)
-  const subtotalAfterDiscount = cartTotal + addonTotal + deliveryCharge - discount - couponDiscount + extraCharges
-  const walletDeduction = useWallet ? Math.min(walletBalance, subtotalAfterDiscount) : 0
+  const subtotalAfterDiscount = Math.round(cartTotal + addonTotal + deliveryCharge + computedDetails.totalCharges + computedDetails.totalTaxes - discount - couponDiscount)
+  const walletDeduction = useWallet ? Math.round(Math.min(walletBalance, subtotalAfterDiscount)) : 0
   const finalPrice = Math.max(0, subtotalAfterDiscount - walletDeduction)
 
-  const handleApplyCoupon = async () => {
+  const handleApplyCoupon = async (codeArg?: any) => {
       setLoadingCoupon(true)
       setCouponError("")
       
-      const result = await verifyCoupon(couponInput, cartTotal, user?.id)
+      const codeToVerify = typeof codeArg === 'string' ? codeArg : couponInput;
+      const result = await verifyCoupon(codeToVerify, cartTotal, addonTotal, user?.id)
       
       if (result.success) {
           setAppliedCoupon({ 
@@ -106,11 +222,36 @@ export function CartView() {
       setLoadingCoupon(false)
   }
 
+  // Auto-recalculate coupon if totals change
+  useEffect(() => {
+    if (appliedCoupon) {
+      verifyCoupon(appliedCoupon.code, cartTotal, addonTotal, user?.id).then(result => {
+        if (result.success) {
+          setAppliedCoupon({ 
+              code: result.code!, 
+              discount: result.discount!, 
+              walletCashback: result.walletCashback || 0,
+              type: result.type || 'discount'
+          })
+        } else {
+          setAppliedCoupon(null)
+          setCouponInput("")
+          toast.error("Coupon is no longer valid for this cart amount")
+        }
+      })
+    }
+  }, [cartTotal, addonTotal])
+
   /* 6. Payment Logic */
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'Online'>('Online')
   const [isProcessing, setIsProcessing] = useState(false)
 
   const handlePayment = async () => {
+    if (isLocationServiceable === false) {
+        toast.error(`Sorry, delivery is not available in ${resolvedAddress || 'your area'}.`)
+        return
+    }
+
     if (!selectedLocation) {
         toast.error("Please add a delivery address")
         return
@@ -119,7 +260,6 @@ export function CartView() {
     // Validate Address Fields
     if (!addressDetails.name || !addressDetails.phone || !addressDetails.house || !addressDetails.city || !addressDetails.pincode) {
         toast.error("Please fill all address details")
-        // Highlight empty fields logic could go here
         return;
     }
 
@@ -131,24 +271,26 @@ export function CartView() {
     setIsProcessing(true)
 
     try {
-        const orderData = {
+    const orderData = {
             shippingAddress: {
                 name: addressDetails.name,
                 phone: addressDetails.phone,
-                addressLine1: `${addressDetails.house}, ${selectedLocation.name}`,
+                addressLine1: `${addressDetails.house}, ${resolvedAddress || selectedLocation?.name || ''}`.trim(),
                 city: addressDetails.city,
-                state: "State", // Could be added to form if needed
+                state: "State",
                 pincode: addressDetails.pincode
             },
             paymentMethod,
             couponCode: appliedCoupon?.code,
-            locationId: selectedLocation._id, // Pass location ID for dynamic fee calculation
             useWallet: useWallet,
             walletUsed: walletDeduction,
             occasion: occasion,
             occasionName: occasionName,
             cakeMessage: cakeMessage,
-            addons: addons
+            addons: addons,
+            scheduledTime: localStorage.getItem('scheduledTime') || null,
+            appliedTaxes: computedDetails.appliedTaxesList,
+            appliedCharges: computedDetails.appliedChargesList
         }
 
         if (paymentMethod === 'Online') {
@@ -161,9 +303,9 @@ export function CartView() {
                 },
                 body: JSON.stringify({ 
                     couponCode: appliedCoupon?.code,
-                    locationId: selectedLocation._id, // Pass location ID
                     useWallet: useWallet,
-                    walletUsed: walletDeduction
+                    walletUsed: walletDeduction,
+                    distanceKm: storeKm
                 })
             })
             const data = await res.json()
@@ -187,6 +329,7 @@ export function CartView() {
                         },
                         body: JSON.stringify({
                             ...orderData,
+                            distanceKm: storeKm,
                             paymentDetails: {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
@@ -197,6 +340,7 @@ export function CartView() {
                     
                     const verifyData = await verifyRes.json()
                     if (verifyRes.ok) {
+                        localStorage.removeItem('scheduledTime')
                         toast.success("Payment Successful! Order Placed.")
                         router.push('/checkout/success') 
                     } else {
@@ -224,11 +368,12 @@ export function CartView() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(orderData)
+                body: JSON.stringify({ ...orderData, distanceKm: storeKm })
             })
             
             const data = await res.json()
             if (res.ok) {
+                 localStorage.removeItem('scheduledTime')
                  toast.success("Order Placed Successfully!")
                  router.push('/checkout/success')
             } else {
@@ -280,17 +425,27 @@ export function CartView() {
                                 <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-300">IMG</div>
                               )}
                           </div>
-                          <div className="flex-1">
-                              <h3 className="font-bold">{item.name}</h3>
-                              <p className="text-sm text-muted-foreground">{item.weight} • {item.type}</p>
-                              <div className="mt-2 flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                      <span className="text-sm font-bold">Qty: {item.quantity}</span>
+                          <div className="flex-1 flex flex-col justify-between">
+                              <div>
+                                  <h3 className="font-bold">{item.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{item.weight} (₹{item.selectedPrice}) • {item.type}</p>
+                              </div>
+                              <div className="mt-2 flex items-end justify-between">
+                                  <div className="flex flex-col gap-1 text-sm font-medium">
+                                      <span className="text-xs text-muted-foreground">Qty: {item.quantity}</span>
+                                      <Button variant="link" size="sm" className="h-auto p-0 text-xs text-primary justify-start" onClick={() => router.push(`/product/${item.id}`)}>
+                                          Show Detail
+                                      </Button>
                                   </div>
-                                  <span className="font-bold">₹{item.price * item.quantity}</span>
+                                  <div className="text-right">
+                                      <span className="font-bold">₹{item.selectedPrice * item.quantity}</span>
+                                      {item.quantity > 1 && (
+                                          <p className="text-[10px] text-muted-foreground">(₹{item.selectedPrice} &times; {item.quantity})</p>
+                                      )}
+                                  </div>
                               </div>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-red-500" onClick={() => removeFromCart(item.id)}>
+                          <Button variant="ghost" size="icon" className="text-red-500 self-start mt-2" onClick={() => removeFromCart(item.id)}>
                               <Trash2 className="h-4 w-4" />
                           </Button>
                       </div>
@@ -347,13 +502,64 @@ export function CartView() {
       )}
       
       {/* 1. Address Section */}
-      <Card className="overflow-hidden border-none shadow-sm">
+      <Card className="overflow-hidden border-none shadow-sm flex flex-col">
+        {isLocationServiceable === false && (
+          <div className="bg-red-50 text-red-700 p-4 border-b border-red-100 flex items-start gap-3">
+             <div className="bg-red-100 p-2 rounded-full shrink-0">
+               <MapPin className="h-5 w-5 text-red-600" />
+             </div>
+             <div>
+               <h4 className="font-bold">Delivery Not Available</h4>
+               <p className="text-sm mt-1">
+                 {resolvedAddress ? `We currently don't deliver to ${resolvedAddress}.` : "We aren't able to deliver to your exact location."} 
+               </p>
+             </div>
+          </div>
+        )}
         <CardHeader className="bg-white pb-4">
              <CardTitle className="flex items-center gap-2 text-lg">
                 <MapPin className="h-5 w-5 text-primary" /> Delivery Address
              </CardTitle>
         </CardHeader>
         <CardContent className="bg-white p-6 pt-2">
+             {/* Compatible UI for Location Permission */}
+             {permissionStatus !== 'granted' && !userLat && (
+                <div className="mb-6 p-4 rounded-2xl bg-primary/5 border border-primary/10 flex flex-col items-center text-center gap-3">
+                    <div className="p-3 bg-white rounded-full shadow-sm">
+                        <MapPin className="h-6 w-6 text-primary animate-pulse" />
+                    </div>
+                    <div className="space-y-1">
+                        <h4 className="font-bold text-sm">Enable Location for Accurate Delivery</h4>
+                        <p className="text-xs text-muted-foreground max-w-[240px]">
+                            We need your location to calculate the exact distance from our store.
+                        </p>
+                    </div>
+                    <div className="flex gap-2 w-full max-w-[280px]">
+                        <Button 
+                            variant="default" 
+                            size="sm" 
+                            className="flex-1 rounded-xl font-bold h-10 shadow-lg shadow-purple-100"
+                            onClick={requestLocation}
+                        >
+                            Use Current Location
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1 rounded-xl font-bold h-10 border-gray-200"
+                            onClick={() => setManualPromptOpen(true)}
+                        >
+                            Enter Manually
+                        </Button>
+                    </div>
+                    {permissionStatus === 'denied' && (
+                        <p className="text-[10px] text-red-500 font-medium">
+                            Location access is blocked. Please enable it in browser settings.
+                        </p>
+                    )}
+                </div>
+             )}
+
              {isLoggedIn ? (
                  <div className="grid gap-4">
                      <div className="grid gap-4">
@@ -377,7 +583,7 @@ export function CartView() {
                             value={addressDetails.house}
                             onChange={(e) => setAddressDetails({...addressDetails, house: e.target.value})}
                         />
-                        <Input placeholder="Street/Area" value={selectedLocation?.name || ''} readOnly className="bg-gray-100 border-transparent" />
+                        <Input placeholder="Street/Area" value={resolvedAddress || selectedLocation?.name || ''} readOnly className="bg-gray-100 border-transparent" />
                      </div>
                      <div className="grid grid-cols-2 gap-4">
                         <Input 
@@ -549,14 +755,14 @@ export function CartView() {
 
        {/* 3. Coupon Section */}
        <Card className="bg-white border-none shadow-sm">
-          <CardHeader className="pb-2">
-              <CardTitle className="text-lg">COUPONS</CardTitle>
+          <CardHeader className="pb-2 text-center">
+              <CardTitle className="text-lg tracking-widest text-muted-foreground font-bold">PROMO CODE</CardTitle>
           </CardHeader>
-          <CardContent className="p-6 pt-2">
-             <div className="flex w-full items-center gap-3">
+          <CardContent className="p-6 pt-2 text-center">
+             <div className="flex w-full items-center justify-center gap-3 max-w-sm mx-auto">
                  <Input 
                      placeholder="Enter coupon code" 
-                     className="h-12 border-dashed bg-gray-50 uppercase" 
+                     className="h-12 border-dashed bg-gray-50 uppercase text-center" 
                      value={couponInput}
                      onChange={(e) => setCouponInput(e.target.value)}
                      disabled={!!appliedCoupon}
@@ -575,7 +781,7 @@ export function CartView() {
                      </Button>
                  ) : (
                      <Button 
-                         className="h-12 px-8 rounded-xl shrink-0 font-bold"
+                         className="h-12 px-8 rounded-xl shrink-0 font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                          onClick={handleApplyCoupon}
                          disabled={loadingCoupon || !couponInput}
                      >
@@ -591,10 +797,36 @@ export function CartView() {
        {/* 5. Price Summary */}
        <Card className="border-none shadow-sm bg-white">
          <CardContent className="space-y-4 p-6">
-             <div className="flex justify-between text-sm">
-                 <span className="text-muted-foreground">Cake Price</span>
-                 <span className="font-medium">₹{cartTotal}</span>
-             </div>
+             {(() => {
+                 const productSavings = items.reduce((acc, item) => {
+                     if (item.cuttedPrice && item.cuttedPrice > item.selectedPrice) {
+                         return acc + (item.cuttedPrice - item.selectedPrice) * item.quantity;
+                     }
+                     return acc;
+                 }, 0);
+                 
+                 return (
+                     <>
+                         <div className="flex justify-between text-sm">
+                             <span className="text-muted-foreground">Cake Price</span>
+                             <div className="flex items-center gap-2">
+                                 {productSavings > 0 && (
+                                     <span className="text-muted-foreground line-through text-xs font-normal">₹{cartTotal + productSavings}</span>
+                                 )}
+                                 <span className="font-medium">₹{cartTotal}</span>
+                             </div>
+                         </div>
+                         {productSavings > 0 && (
+                             <div className="flex justify-between text-sm bg-blue-50/50 p-2 rounded-lg border border-blue-100/50">
+                                 <span className="text-blue-700 font-bold flex items-center gap-1 italic">
+                                     <Star className="h-3 w-3 fill-blue-500 text-blue-500" /> Hurray! You Saved Extra
+                                 </span>
+                                 <span className="font-bold text-blue-700">₹{productSavings}</span>
+                             </div>
+                         )}
+                     </>
+                 );
+             })()}
              {addonTotal > 0 && (
                  <div className="flex justify-between text-sm">
                      <span className="text-muted-foreground flex items-center gap-1">
@@ -614,14 +846,69 @@ export function CartView() {
                  </div>
              )}
 
-            <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Delivery Charge</span>
-                 <span className="font-medium">₹{deliveryCharge}</span>
-            </div>
-             <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Extra Charges</span>
-                <span className="font-medium">₹{extraCharges}</span>
-            </div>
+            {deliveryCharge > 0 ? (
+                <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                        <Truck className="h-3 w-3" /> Delivery Charge
+                    </span>
+                    <span className="font-medium">₹{deliveryCharge}</span>
+                </div>
+            ) : (deliverySettings && !deliverySettings.isActive) || (deliverySettings?.isActive && deliveryCharge === 0) ? (
+                <div className="flex justify-between text-sm bg-green-50 p-2 rounded-lg border border-green-100">
+                    <span className="text-green-700 font-bold flex items-center gap-1">
+                        <Truck className="h-3 w-3" /> Congratulations! Free Delivery
+                    </span>
+                    <span className="font-bold text-green-700">₹0</span>
+                </div>
+            ) : null}
+            {/* Delivery breakdown – only shown when there are multiple components */}
+            {deliveryBreakdown.length > 1 && (
+                <div className="ml-4 space-y-0.5">
+                    {deliveryBreakdown.map((row, i) => (
+                        <div key={i} className="flex justify-between text-xs text-muted-foreground">
+                            <span>{row.label}</span>
+                            <span>₹{row.amount}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+            
+            {/* Dynamic Flat Charges */}
+            {computedDetails.appliedChargesList.map((charge, i) => (
+                <div key={`charge-${i}`} className="flex justify-between text-sm group relative">
+                    <span className="text-muted-foreground flex items-center gap-1 cursor-help border-b border-dashed border-gray-300 pb-0.5">
+                        {charge.name}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden w-72 bg-gray-900/95 backdrop-blur-md text-white text-[11px] leading-relaxed p-4 rounded-2xl shadow-2xl group-hover:block z-50 transition-all duration-300 border border-white/10">
+                            <div className="flex items-start gap-2">
+                                <Info className="h-3 w-3 mt-0.5 text-primary shrink-0" />
+                                <p>{charge.description}</p>
+                            </div>
+                            {/* Little triangle pointer */}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-8 border-transparent border-t-gray-900/95"></div>
+                        </div>
+                    </span>
+                    <span className="font-medium">+ ₹{charge.amount}</span>
+                </div>
+            ))}
+
+            {/* Dynamic Percentage Taxes */}
+            {computedDetails.appliedTaxesList.map((tax, i) => (
+                <div key={`tax-${i}`} className="flex justify-between text-sm group relative">
+                    <span className="text-muted-foreground flex items-center gap-1 cursor-help border-b border-dashed border-gray-300 pb-0.5">
+                        {tax.name}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 hidden w-72 bg-gray-900/95 backdrop-blur-md text-white text-[11px] leading-relaxed p-4 rounded-2xl shadow-2xl group-hover:block z-50 transition-all duration-300 border border-white/10">
+                            <div className="flex items-start gap-2">
+                                <Info className="h-3 w-3 mt-0.5 text-primary shrink-0" />
+                                <p>{tax.description}</p>
+                            </div>
+                            {/* Little triangle pointer */}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-8 border-transparent border-t-gray-900/95"></div>
+                        </div>
+                    </span>
+                    <span className="font-medium text-red-600">+ ₹{tax.amount}</span>
+                </div>
+            ))}
+
             {useWallet && walletDeduction > 0 && (
                 <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground flex items-center gap-1">
@@ -678,7 +965,7 @@ export function CartView() {
           <Button 
             className="w-full h-16 rounded-2xl text-xl font-bold shadow-xl shadow-purple-200 hover:shadow-purple-300 transition-all disabled:opacity-50"
             onClick={handlePayment}
-            disabled={isProcessing}
+            disabled={isProcessing || isLocationServiceable === false}
           >
             {isProcessing ? "Processing..." : `PAY ₹${finalPrice}`}
           </Button>

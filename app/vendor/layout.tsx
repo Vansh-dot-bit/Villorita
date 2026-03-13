@@ -40,12 +40,12 @@ export default function VendorLayout({
       <aside className="w-64 bg-white border-r shadow-sm hidden md:flex flex-col">
         <div className="p-6 border-b">
           <Link href="/vendor" className="flex items-center gap-2 font-bold text-xl text-purple-700">
-            <div className="relative h-14 w-36">
+            <div className="relative h-12 w-36 rounded-xl overflow-hidden flex items-center justify-start">
                 <Image 
-                    src="/logo2.png" 
-                    alt="Purple Bite" 
+                    src="/logo.png" 
+                    alt="Villorita" 
                     fill 
-                    className="object-contain"
+                    className="object-contain object-left"
                 />
             </div>
             <span>Vendor Panel</span>

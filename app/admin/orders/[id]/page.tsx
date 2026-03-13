@@ -99,21 +99,38 @@ export default function AdminOrderDetailPage() {
                   </CardHeader>
                   <CardContent>
                       <div className="space-y-6">
+                          {/* Order Level Vendor Assignment */}
+                          <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                              <h3 className="font-semibold text-sm text-purple-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                  <UserCheck className="h-4 w-4" /> Vendor Assignment
+                              </h3>
+                              <div className="max-w-md bg-white p-4 rounded-lg shadow-sm">
+                                  <VendorAssignment 
+                                      orderId={order._id}
+                                      currentVendorId={order.vendor?._id}
+                                      currentVendorName={order.vendor?.name}
+                                      onAssigned={fetchOrder}
+                                  />
+                              </div>
+                          </div>
+
                           {/* Items */}
                           <div className="space-y-4">
-                              <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Items</h3>
+                          <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Items</h3>
                               {order.items.map((item: any, idx: number) => (
-                                  <div key={idx} className="flex gap-4 items-center border-b pb-4 last:border-0 last:pb-0">
-                                      <div className="h-16 w-16 bg-gray-100 rounded-lg overflow-hidden relative">
+                                  <div key={idx} className="flex gap-4 items-start border-b pb-6 last:border-0 last:pb-0">
+                                      <div className="h-16 w-16 bg-gray-100 rounded-lg overflow-hidden relative shrink-0">
                                             {item.image ? (
-                                                <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                                                <img src={item.image.startsWith('http') ? item.image : `/api/uploads/${item.image}`} alt={item.name} className="h-full w-full object-cover" />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-300">IMG</div>
                                             )}
                                       </div>
-                                      <div className="flex-1">
-                                          <p className="font-medium">{item.name}</p>
-                                          <p className="text-sm text-muted-foreground">{item.weight} • Qty: {item.quantity}</p>
+                                      <div className="flex-1 space-y-2">
+                                          <div>
+                                              <p className="font-medium">{item.name}</p>
+                                              <p className="text-sm text-muted-foreground">{item.weight} • Qty: {item.quantity}</p>
+                                          </div>
                                       </div>
                                       <p className="font-bold">₹{item.price * item.quantity}</p>
                                   </div>
@@ -167,8 +184,33 @@ export default function AdminOrderDetailPage() {
                                   </div>
                                   <div className="flex gap-8 justify-between text-sm">
                                       <span className="text-muted-foreground">Delivery</span>
-                                      <span>₹{order.deliveryCharge}</span>
+                                      <span className={order.deliveryCharge === 0 ? "text-green-600 font-bold" : ""}>
+                                          {order.deliveryCharge === 0 ? "Free Delivery" : `₹${order.deliveryCharge}`}
+                                      </span>
                                   </div>
+                                  
+                                  {order.appliedCharges && order.appliedCharges.length > 0 && order.appliedCharges.map((charge: any, idx: number) => (
+                                      <div key={`charge-${idx}`} className="flex gap-8 justify-between text-sm">
+                                          <span className="text-muted-foreground">{charge.name}</span>
+                                          <span>₹{charge.amount}</span>
+                                      </div>
+                                  ))}
+
+                                  {order.appliedTaxes && order.appliedTaxes.length > 0 && order.appliedTaxes.map((tax: any, idx: number) => (
+                                      <div key={`tax-${idx}`} className="flex gap-8 justify-between text-sm">
+                                          <span className="text-muted-foreground">{tax.name}</span>
+                                          <span className="text-red-600">₹{tax.amount}</span>
+                                      </div>
+                                  ))}
+
+                                  {/* Wallet Used */}
+                                  {order.walletUsed && order.walletUsed > 0 ? (
+                                      <div className="flex gap-8 justify-between text-sm">
+                                          <span className="text-muted-foreground">Wallet Used</span>
+                                          <span className="text-purple-600 font-medium">- ₹{order.walletUsed}</span>
+                                      </div>
+                                  ) : null}
+
                                   <div className="flex gap-8 justify-between font-bold text-lg pt-2 border-t mt-2">
                                       <span>Total</span>
                                       <span className="text-primary">₹{order.totalAmount}</span>
@@ -327,20 +369,6 @@ export default function AdminOrderDetailPage() {
                       </CardContent>
                   </Card>
               )}
-
-              <Card className="border-none shadow-sm">
-                  <CardHeader>
-                      <CardTitle className="text-base">Vendor Assignment</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <VendorAssignment 
-                        orderId={order._id}
-                        currentVendorId={order.vendor?._id}
-                        currentVendorName={order.vendor?.name}
-                        onAssigned={fetchOrder}
-                      />
-                  </CardContent>
-              </Card>
           </div>
       </div>
     </div>

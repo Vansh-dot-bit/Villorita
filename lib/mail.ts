@@ -19,7 +19,7 @@ function createTransporter() {
 export async function sendOrderConfirmationEmail(to: string, order: any) {
   try {
     const mailOptions = {
-      from: process.env.GMAIL_USER,
+      from: `Villorita <${process.env.GMAIL_USER}>`,
       to,
       subject: `Order Confirmation - Order #${order._id}`,
       html: `
@@ -79,7 +79,7 @@ export async function sendOrderConfirmationEmail(to: string, order: any) {
 export async function sendOTP(to: string, otp: string) {
   try {
     const mailOptions = {
-      from: process.env.GMAIL_USER,
+      from: `Villorita <${process.env.GMAIL_USER}>`,
       to,
       subject: 'Your Verification OTP - Villorita',
       html: `
@@ -111,6 +111,106 @@ export async function sendOTP(to: string, otp: string) {
     console.error('❌ Failed to send OTP email. Error:', error?.message || error);
     console.error('   GMAIL_USER set:', !!process.env.GMAIL_USER);
     console.error('   GMAIL_APP_PASSWORD set:', !!process.env.GMAIL_APP_PASSWORD);
+    return false;
+  }
+}
+
+export async function sendVendorOrderNotification(to: string, orderId: string, vendorName: string) {
+  try {
+    const mailOptions = {
+      from: `Villorita <${process.env.GMAIL_USER}>`,
+      to,
+      subject: `New Order Assigned - Order #${orderId}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;">
+          <h1 style="color: #6b21a8;">New Order Assigned!</h1>
+          <p>Hi ${vendorName},</p>
+          <p>You have got a new order from Villorita! Please check your vendor dashboard to start preparing it.</p>
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Order ID:</strong> ${orderId}</p>
+          </div>
+          <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
+            Villorita Team<br>
+            <a href="${process.env.NEXTAUTH_URL}/vendor/orders" style="color: #6b21a8;">Go to Dashboard</a>
+          </p>
+        </div>
+      `,
+    };
+
+    const transporter = createTransporter();
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 Vendor notification email sent to ${to}`);
+    return true;
+  } catch (error: any) {
+    console.error('❌ Failed to send vendor notification email:', error?.message || error);
+    return false;
+  }
+}
+
+export async function sendVendorItemAssignedEmail(to: string, orderId: string, vendorName: string, itemName: string) {
+  try {
+    const mailOptions = {
+      from: `Villorita <${process.env.GMAIL_USER}>`,
+      to,
+      subject: `New Item Assigned - Order #${orderId}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;">
+          <h1 style="color: #6b21a8;">New Assignment!</h1>
+          <p>Hi ${vendorName},</p>
+          <p>You have been assigned to prepare a specific item for an order from Villorita. Please check your vendor dashboard to start preparing it.</p>
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Order ID:</strong> ${orderId}</p>
+            <p><strong>Item Name:</strong> ${itemName}</p>
+          </div>
+          <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
+            Villorita Team<br>
+            <a href="${process.env.NEXTAUTH_URL}/vendor/orders" style="color: #6b21a8;">Go to Dashboard</a>
+          </p>
+        </div>
+      `,
+    };
+
+    const transporter = createTransporter();
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 Vendor item notification email sent to ${to}`);
+    return true;
+  } catch (error: any) {
+    console.error('❌ Failed to send vendor item notification email:', error?.message || error);
+    return false;
+  }
+}
+
+export async function sendDeliveryAgentNotification(to: string[] | string, orderId: string) {
+  try {
+    // If 'to' is empty, do nothing
+    if (!to || (Array.isArray(to) && to.length === 0)) return false;
+    
+    const mailOptions = {
+      from: `Villorita <${process.env.GMAIL_USER}>`,
+      to, // Can be an array of agent emails
+      subject: `New Delivery Available - Order #${orderId}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 12px;">
+          <h1 style="color: #eab308;">New Delivery Request!</h1>
+          <p>Hi Delivery Partner,</p>
+          <p>You got a new delivery from Villorita! An order is ready for pickup.</p>
+          <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p><strong>Order ID:</strong> ${orderId}</p>
+          </div>
+          <p>Log in to your agent app to accept this delivery.</p>
+          <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
+            Villorita Team
+          </p>
+        </div>
+      `,
+    };
+
+    const transporter = createTransporter();
+    await transporter.sendMail(mailOptions);
+    console.log(`📧 Delivery Agent notification email sent to ${to}`);
+    return true;
+  } catch (error: any) {
+    console.error('❌ Failed to send delivery agent notification email:', error?.message || error);
     return false;
   }
 }

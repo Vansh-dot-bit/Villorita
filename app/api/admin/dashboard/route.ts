@@ -35,6 +35,24 @@ export async function GET(request: Request) {
                   in: { $add: ['$$value', { $multiply: ['$$this.price', { $ifNull: ['$$this.quantity', 1] }] }] }
                 }
               }
+            },
+            taxesTotal: {
+              $sum: {
+                $reduce: {
+                  input: { $ifNull: ['$appliedTaxes', []] },
+                  initialValue: 0,
+                  in: { $add: ['$$value', '$$this.amount'] }
+                }
+              }
+            },
+            chargesTotal: {
+              $sum: {
+                $reduce: {
+                  input: { $ifNull: ['$appliedCharges', []] },
+                  initialValue: 0,
+                  in: { $add: ['$$value', '$$this.amount'] }
+                }
+              }
             }
           },
         },
@@ -55,7 +73,7 @@ export async function GET(request: Request) {
         },
       ]);
 
-      const base    = baseMetrics[0]   || { grossRevenue: 0, delivery: 0, coupons: 0, wallet: 0, addonsTotal: 0 };
+      const base    = baseMetrics[0]   || { grossRevenue: 0, delivery: 0, coupons: 0, wallet: 0, addonsTotal: 0, taxesTotal: 0, chargesTotal: 0 };
       const refunds = refundMetrics[0] || { totalRefunds: 0 };
       return { ...base, ...refunds };
     };
@@ -170,6 +188,8 @@ export async function GET(request: Request) {
       const coupons         = m.coupons;
       const wallet          = m.wallet;
       const addonsTotal     = m.addonsTotal || 0;
+      const taxesTotal      = m.taxesTotal || 0;
+      const chargesTotal    = m.chargesTotal || 0;
 
       // Platform's cut from product sales (based on per-store adminCutPercentage)
       const platformRevenue = b.totalPlatformShare;
@@ -177,14 +197,17 @@ export async function GET(request: Request) {
       const vendorRevenue   = b.totalVendorShare;
 
       // Net Profit = what the platform keeps after paying vendors
-      // (platformRevenue + delivery income + addons income) - refunds - coupons - wallet adjustments
-      const netProfit = platformRevenue + delivery + addonsTotal - refunds - coupons - wallet;
+      // (platformRevenue + delivery income + addons income + taxes + charges) - refunds - coupons - wallet adjustments
+      const netProfit = platformRevenue + delivery + addonsTotal + taxesTotal + chargesTotal - refunds - coupons - wallet;
 
       return {
         grossRevenue,
         platformRevenue,
+        vendorsShare: vendorRevenue, // Keep original syntax if needed by other components, wait actually the object key is 'vendorRevenue'
         vendorRevenue,
         addonsTotal,
+        taxesTotal,
+        chargesTotal,
         delivery,
         coupons,
         wallet,

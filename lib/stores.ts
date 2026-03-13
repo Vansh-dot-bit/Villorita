@@ -16,7 +16,8 @@ export function serializeStore(store: any) {
 export async function getStoreByVendorId(vendorId: string) {
   await dbConnect();
   try {
-    const store = await Store.findOne({ vendorId, isActive: true });
+    // Do NOT filter by isActive — vendor must always be able to see and manage their own store
+    const store = await Store.findOne({ vendorId });
     if (!store) return null;
     return serializeStore(store);
   } catch (error) {
@@ -34,8 +35,9 @@ export async function getStores() {
 export async function getListedStores() {
   await dbConnect();
   try {
+    // Include unavailable stores so they still appear on home page — the StoreUnavailableBanner
+    // on the store page itself tells the user the store is currently closed.
     const stores = await Store.find({ 
-        isActive: true, 
         isListedOnHome: true 
     }).sort({ createdAt: -1 });
     return stores.map(serializeStore);

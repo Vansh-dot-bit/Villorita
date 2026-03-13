@@ -5,8 +5,12 @@ import Coupon from "@/models/Coupon"
 import Order from "@/models/Order"
 import mongoose from "mongoose"
 
-export async function verifyCoupon(code: string, orderTotal: number, userId?: string) {
+export async function verifyCoupon(code: string, itemsTotal: number, addonsTotal: number = 0, userId?: string) {
   try {
+    if (!code || typeof code !== 'string') {
+        return { success: false, message: "Invalid coupon format" }
+    }
+
     await dbConnect()
     
     const coupon = await Coupon.findOne({ 
@@ -23,8 +27,9 @@ export async function verifyCoupon(code: string, orderTotal: number, userId?: st
         return { success: false, message: "Coupon has expired" }
     }
 
-    // Check min order amount
-    if (coupon.minOrderAmount > orderTotal) {
+    // Check min order amount against full subtotal
+    const subtotal = itemsTotal + addonsTotal;
+    if (coupon.minOrderAmount > subtotal) {
         return { success: false, message: `Minimum order amount is ₹${coupon.minOrderAmount}` }
     }
     
@@ -65,12 +70,13 @@ export async function verifyCoupon(code: string, orderTotal: number, userId?: st
     // Regular discount coupons
     let discount = 0
     if (coupon.discountType === 'percentage') {
-        discount = (orderTotal * coupon.discountValue) / 100
+        discount = (itemsTotal * coupon.discountValue) / 100
         if (coupon.maxDiscount) {
             discount = Math.min(discount, coupon.maxDiscount)
         }
+        discount = Math.min(discount, subtotal)
     } else {
-        discount = coupon.discountValue
+        discount = Math.min(coupon.discountValue, subtotal)
     }
 
     return { 

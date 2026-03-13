@@ -34,6 +34,7 @@ export async function PUT(
     if (body.weights && body.weights.length > 0) {
         body.price = body.weights[0].price || 0;
         body.costPrice = body.weights[0].costPrice || 0;
+        body.cuttedPrice = body.weights[0].cuttedPrice;
     }
 
     const product = await Product.findByIdAndUpdate(resolvedParams.id, body, { new: true });

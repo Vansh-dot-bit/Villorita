@@ -110,6 +110,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
                 phone: (vendorStore as any).phone || '',
             };
         }
+
+        // Send email to the assigned vendor
+        const User = (await import('@/models/User')).default;
+        const vendorUser = await User.findById(vendorId);
+        if (vendorUser && vendorUser.email) {
+            import('@/lib/mail').then(({ sendVendorOrderNotification }) => {
+                sendVendorOrderNotification(vendorUser.email, order._id.toString(), vendorUser.name);
+            }).catch(e => console.error("Failed to load mail library", e));
+        }
     } else if (action === 'vendor_verify') {
         // Vendor verifies delivery -> Check OTP -> Status 'Delivered'
         const { otp } = body;

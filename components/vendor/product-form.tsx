@@ -157,12 +157,12 @@ export function VendorProductForm({ product, storeId }: VendorProductFormProps) 
             </Button>
         </div>
         <div className="space-y-3">
-            {weights.map((w, index) => (
-                <div key={index} className="grid grid-cols-12 gap-2 items-end">
-                    <div className="col-span-7">
-                        <Label className="text-xs">Weight/Size</Label>
+            {weights.map((w: any, index) => (
+                <div key={index} className="grid grid-cols-12 gap-2 items-end border-b pb-3 mb-3 last:border-0">
+                    <div className="col-span-4">
+                        <Label className="text-[10px] uppercase font-bold text-gray-500">Weight/Size</Label>
                         <Input 
-                            placeholder="e.g. 1kg or Large" 
+                            placeholder="e.g. 1kg" 
                             value={w.weight} 
                             onChange={(e) => {
                                 const newWeights = [...weights];
@@ -171,8 +171,8 @@ export function VendorProductForm({ product, storeId }: VendorProductFormProps) 
                             }}
                         />
                     </div>
-                    <div className="col-span-4">
-                        <Label className="text-xs">Listing Price</Label>
+                    <div className="col-span-3">
+                        <Label className="text-[10px] uppercase font-bold text-gray-500">Selling Price</Label>
                         <Input 
                             type="number" 
                             placeholder="0" 
@@ -185,21 +185,39 @@ export function VendorProductForm({ product, storeId }: VendorProductFormProps) 
                             }}
                         />
                     </div>
-                    <div className="col-span-1">
-                        <Button type="button" variant="ghost" size="icon" className="mb-0.5" onClick={() => setWeights(weights.filter((_, i) => i !== index))}>
+                    <div className="col-span-3">
+                        <Label className="text-[10px] uppercase font-bold text-purple-600">Cutted Price (MRP)</Label>
+                        <Input 
+                            type="number" 
+                            placeholder="0" 
+                            value={isNaN(w.cuttedPrice) ? '' : w.cuttedPrice}
+                            onChange={(e) => {
+                                const newWeights = [...weights];
+                                const val = parseFloat(e.target.value);
+                                newWeights[index].cuttedPrice = isNaN(val) ? NaN : val;
+                                setWeights(newWeights);
+                            }}
+                        />
+                    </div>
+                    <div className="col-span-2 flex justify-end">
+                        <Button type="button" variant="ghost" size="icon" onClick={() => setWeights(weights.filter((_, i) => i !== index))}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                     </div>
                 </div>
             ))}
             {weights.length === 0 && (
-                <p className="text-sm text-red-500 italic">Please add at least one variant.</p>
+                <p className="text-sm text-red-500 italic text-center py-4">Please add at least one variant.</p>
             )}
         </div>
         <input 
             type="hidden" 
             name="weights" 
-            value={JSON.stringify(weights.map(w => ({ weight: w.weight, price: isNaN(w.price) ? 0 : w.price })))} 
+            value={JSON.stringify(weights.map(w => ({ 
+                weight: w.weight, 
+                price: isNaN(w.price) ? 0 : w.price,
+                cuttedPrice: isNaN(w.cuttedPrice as any) ? undefined : w.cuttedPrice
+            })))} 
             suppressHydrationWarning 
         />
       </div>

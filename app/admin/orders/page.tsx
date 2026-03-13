@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+﻿/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect } from "react";
@@ -300,6 +300,22 @@ export default function AdminOrdersPage() {
                                               {order.storeSnapshot.name}
                                           </p>
                                       )}
+                                       <div className="flex flex-wrap gap-1.5 mt-1">
+                                           {order.makingTime && (
+                                               <span className="text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full border border-purple-100 font-semibold">
+                                                   Making: {order.makingTime} mins
+                                               </span>
+                                           )}
+                                           {order.scheduledTime ? (
+                                               <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-100 font-semibold">
+                                                   Scheduled: {order.scheduledTime}
+                                               </span>
+                                           ) : (
+                                               <span className="text-[10px] bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full border border-gray-100 font-semibold">
+                                                   No Schedule (ASAP)
+                                               </span>
+                                           )}
+                                       </div>
                                   </div>
 
                                   {/* Customer Info */}
@@ -447,7 +463,7 @@ export default function AdminOrdersPage() {
                                               {order.otp && ['punched', 'preparing your cake', 'Out for Delivery'].includes(order.orderStatus) && (
                                                   <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
                                                       <h4 className="font-semibold text-sm flex items-center gap-2 text-purple-900 mb-2">
-                                                          <span className="shrink-0 h-4 w-4 rounded-full bg-purple-200 flex items-center justify-center">🎯</span> Delivery OTP
+                                                          <span className="shrink-0 h-4 w-4 rounded-full bg-purple-200 flex items-center justify-center">ðŸŽ¯</span> Delivery OTP
                                                       </h4>
                                                       <div className="bg-white px-3 py-2 rounded-lg border-2 border-purple-200 text-center">
                                                           <span className="font-mono flex items-center justify-center text-xl font-bold tracking-[0.2em] text-purple-900">{order.otp}</span>

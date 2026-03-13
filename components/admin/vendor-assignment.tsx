@@ -82,7 +82,7 @@ export function VendorAssignment({ orderId, currentVendorId, currentVendorName, 
       
       const data = await res.json()
       if (data.success) {
-        toast.success("Vendor assigned successfully")
+        toast.success("Vendor assigned perfectly")
         onAssigned()
       } else {
         toast.error(data.error || "Failed to assign vendor")

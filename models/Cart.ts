@@ -23,6 +23,13 @@ const CartItemSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  cuttedPrice: {
+    type: Number,
+  },
+  storeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Store',
+  }
 });
 
 const CartSchema = new mongoose.Schema({

@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { LocationProvider } from "@/context/location-context";
 import { LocationModal } from "@/components/location/location-modal";
+import { GpsProvider } from "@/context/gps-context";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -29,6 +30,7 @@ export default function RootLayout({
       <html lang="en">
         <body className={`${outfit.variable} antialiased`}>
           <AuthProvider>
+            <GpsProvider>
             <LocationProvider>
             <CartProvider>
                 {children}
@@ -36,6 +38,7 @@ export default function RootLayout({
                 <Toaster />
             </CartProvider>
             </LocationProvider>
+            </GpsProvider>
           </AuthProvider>
         </body>
       </html>

@@ -20,8 +20,8 @@ function serializeCategory(category: any) {
 
 export async function getCategories() {
   await dbConnect();
-  // Fetch all categories (global + store-linked) for the public home page
-  const categories = await Category.find({}).sort({ name: 1 });
+  // Fetch only global categories (no storeId) for the public home page
+  const categories = await Category.find({ storeId: { $exists: false } }).sort({ name: 1 });
   return categories.map(serializeCategory);
 }
 

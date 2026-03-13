@@ -9,12 +9,14 @@ import { UserMenu } from "@/components/layout/user-menu"
 import { AuthModal } from "@/components/auth/auth-modal"
 import { useState } from "react"
 import { useLocation } from "@/context/location-context"
+import { useGps } from "@/context/gps-context"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 
 export function Header({ className }: { className?: string }) {
   const { user } = useAuth();
   const { selectedLocation, setSelectedLocation } = useLocation();
+  const { resolvedAddress, isLocationServiceable, requestLocation, gpsError, setManualPromptOpen } = useGps();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,7 +37,8 @@ export function Header({ className }: { className?: string }) {
   };
 
   const handleChangeLocation = () => {
-    setSelectedLocation(null);
+    // Open the manual location selection modal if they want to override or retry
+    setManualPromptOpen(true);
   };
 
   const handleSearch = (e?: React.FormEvent) => {
@@ -54,12 +57,12 @@ export function Header({ className }: { className?: string }) {
           {/* Left: Logo */}
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              <div className="relative h-16 w-40 md:h-20 md:w-48">
+              <div className="relative h-10 w-36 md:h-12 md:w-40 rounded-xl overflow-hidden flex items-center justify-start">
                 <Image
-                  src="/logo2.png"
+                  src="/logo.png"
                   alt="Villorita"
                   fill
-                  className="object-contain"
+                  className="object-contain object-left"
                   priority
                 />
               </div>
@@ -68,9 +71,21 @@ export function Header({ className }: { className?: string }) {
 
           {/* Center: Search & Location — desktop only */}
           <div className="hidden flex-1 items-center justify-center gap-4 px-8 md:flex">
-            <Button variant="outline" className="h-10 gap-2 rounded-full border-dashed px-4 text-muted-foreground hover:bg-muted hover:text-foreground" onClick={handleChangeLocation}>
-              <MapPin className="h-4 w-4" />
-              <span>{selectedLocation ? selectedLocation.name : 'Select Location'}</span>
+            <Button 
+                variant="outline" 
+                className={`h-10 gap-2 rounded-full border-dashed px-4 ${
+                  isLocationServiceable === false 
+                    ? 'text-red-500 border-red-200 bg-red-50 hover:bg-red-100 hover:text-red-600' 
+                    : gpsError
+                      ? 'text-orange-600 border-orange-300 bg-orange-50 hover:bg-orange-100 animate-pulse'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`} 
+                onClick={handleChangeLocation}
+            >
+              <MapPin className={`h-4 w-4 ${gpsError && isLocationServiceable !== false ? 'text-orange-600' : ''}`} />
+              <span className="truncate max-w-[150px]">
+                {resolvedAddress ? (isLocationServiceable === false ? `No delivery to ${resolvedAddress}` : resolvedAddress) : (gpsError ? 'Location Blocked (Click to Allow)' : 'Detecting Location...')}
+              </span>
             </Button>
             <form className="relative w-full max-w-sm" onSubmit={handleSearch}>
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

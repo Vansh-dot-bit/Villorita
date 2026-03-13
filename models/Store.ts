@@ -6,11 +6,13 @@ export interface IStore extends Document {
   description?: string;
   photo?: string;
   address: string;
-  km: number;
+  lat?: number;
+  lng?: number;
   opensAt: string;
   closesAt: string;
   isListedOnHome: boolean;
   isActive: boolean;
+  rating?: number;
   deliveryTime?: string;
   adminCutPercentage: number;
   createdAt: Date;
@@ -40,10 +42,11 @@ const StoreSchema = new Schema<IStore>({
     required: [true, 'Store address is required'],
     trim: true,
   },
-  km: {
+  lat: {
     type: Number,
-    required: [true, 'Distance in km is required'],
-    min: 0,
+  },
+  lng: {
+    type: Number,
   },
   opensAt: {
     type: String,
@@ -61,6 +64,12 @@ const StoreSchema = new Schema<IStore>({
     type: Boolean,
     default: true,
   },
+  rating: {
+    type: Number,
+    default: 5,
+    min: 0,
+    max: 5,
+  },
   adminCutPercentage: {
     type: Number,
     default: 0,
@@ -72,5 +81,13 @@ const StoreSchema = new Schema<IStore>({
     default: '',
   }
 }, { timestamps: true });
+
+// HMR cache-bust: recompile if schema is stale (missing new fields).
+if (mongoose.models.Store) {
+  const schema = mongoose.models.Store.schema;
+  if (!schema.paths.rating || !schema.paths.lat) {
+      delete mongoose.models.Store;
+  }
+}
 
 export default (mongoose.models.Store as mongoose.Model<IStore>) || mongoose.model<IStore>('Store', StoreSchema);

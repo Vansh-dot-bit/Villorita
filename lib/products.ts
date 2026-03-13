@@ -22,7 +22,11 @@ function serializeProduct(product: any) {
       createdAt: r.createdAt?.toISOString ? r.createdAt.toISOString() : r.createdAt,
     })) || [],
     isCombo: p.isCombo !== undefined ? p.isCombo : false,
-    storeId: p.storeId?.toString ? p.storeId.toString() : p.storeId,
+    store: p.storeId && typeof p.storeId === 'object' && p.storeId.name ? {
+      name: p.storeId.name,
+      deliveryTime: p.storeId.deliveryTime || "45",
+    } : undefined,
+    storeId: p.storeId?._id ? p.storeId._id.toString() : (p.storeId?.toString ? p.storeId.toString() : p.storeId),
   };
 }
 
@@ -45,8 +49,10 @@ export async function getProductsByStore(storeId: string) {
 
 export async function getProductById(id: string) {
   await dbConnect();
+  // Ensure Store model is registered
+  require('@/models/Store');
   try {
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).populate('storeId', 'name deliveryTime');
     if (!product) return null;
     return serializeProduct(product);
   } catch (error) {

@@ -287,10 +287,35 @@ export default function UserOrderDetailPage() {
                     <span className="text-green-600">- ₹{order.discount}</span>
                   </div>
                 )}
+                {/* Delivery Charge */}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Delivery Charge</span>
-                  <span>₹{order.deliveryCharge}</span>
+                  <span className={order.deliveryCharge === 0 ? "text-green-600 font-bold" : ""}>
+                    {order.deliveryCharge === 0 ? "Free Delivery" : `₹${order.deliveryCharge}`}
+                  </span>
                 </div>
+                {/* Custom Charges */}
+                {order.appliedCharges && order.appliedCharges.length > 0 && order.appliedCharges.map((charge: any, idx: number) => (
+                    <div key={`charge-${idx}`} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{charge.name}</span>
+                        <span>₹{charge.amount}</span>
+                    </div>
+                ))}
+                {/* Applied Taxes */}
+                {order.appliedTaxes && order.appliedTaxes.length > 0 && order.appliedTaxes.map((tax: any, idx: number) => (
+                    <div key={`tax-${idx}`} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{tax.name}</span>
+                        <span className="text-red-600">₹{tax.amount}</span>
+                    </div>
+                ))}
+                {/* Wallet Used */}
+                {order.walletUsed && order.walletUsed > 0 ? (
+                    <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Wallet Used</span>
+                        <span className="text-purple-600 font-medium">- ₹{order.walletUsed}</span>
+                    </div>
+                ) : null}
+
                 <div className="flex justify-between font-bold text-lg pt-2 border-t">
                   <span>Total Amount</span>
                   <span className={`text-primary ${order.orderStatus === 'Cancelled' ? 'line-through text-gray-400' : ''}`}>₹{order.totalAmount}</span>
