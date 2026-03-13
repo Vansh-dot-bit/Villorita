@@ -1,11 +1,11 @@
-﻿/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ShoppingBag, CheckCircle, Clock, Truck, Store } from "lucide-react"
+import { ShoppingBag, CheckCircle, Clock, Truck, Store, Package, UserCheck } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -460,38 +460,42 @@ export default function AdminOrdersPage() {
 
                                           {/* OTP & Actions */}
                                           <div className="space-y-4">
-                                              {order.otp && ['punched', 'preparing your cake', 'Out for Delivery'].includes(order.orderStatus) && (
-                                                  <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
-                                                      <h4 className="font-semibold text-sm flex items-center gap-2 text-purple-900 mb-2">
-                                                          <span className="shrink-0 h-4 w-4 rounded-full bg-purple-200 flex items-center justify-center">ðŸŽ¯</span> Delivery OTP
-                                                      </h4>
-                                                      <div className="bg-white px-3 py-2 rounded-lg border-2 border-purple-200 text-center">
-                                                          <span className="font-mono flex items-center justify-center text-xl font-bold tracking-[0.2em] text-purple-900">{order.otp}</span>
-                                                      </div>
-                                                      <p className="text-[10px] text-center text-purple-600 mt-1.5 font-medium">To be shared with vendor by customer</p>
-                                                  </div>
-                                              )}
-                                              
-                                              {/* Vendor Assignment */}
-                                              <div className="bg-white p-4 rounded-xl border">
-                                                  <h4 className="font-semibold text-sm mb-3">Vendor Assignment</h4>
-                                                  <VendorAssignment 
-                                                      orderId={order._id}
-                                                      currentVendorId={order.vendor?._id}
-                                                      currentVendorName={order.vendor?.name}
-                                                      onAssigned={fetchOrders}
-                                                  />
-                                              </div>
-                                          </div>
-                                      </div>
-                                  </div>
-                              )}
-                        </div>
-                    </Card>
-                ))
-            )}
-        </div>
-      )}
+                                               {order.otp && ['punched', 'preparing your cake', 'Out for Delivery'].includes(order.orderStatus) && (
+                                                   <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                                       <h4 className="font-semibold text-sm flex items-center gap-2 text-purple-900 mb-2">
+                                                           <Package className="h-4 w-4" /> Delivery OTP
+                                                       </h4>
+                                                       <div className="bg-white px-3 py-2 rounded-lg border-2 border-purple-200 text-center">
+                                                           <span className="font-mono flex items-center justify-center text-xl font-bold tracking-[0.2em] text-purple-900">{order.otp}</span>
+                                                       </div>
+                                                       <p className="text-[10px] text-center text-purple-600 mt-1.5 font-medium">To be shared with vendor by customer</p>
+                                                   </div>
+                                               )}
+                                               
+                                               {/* Vendor Assignment */}
+                                               <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
+                                                   <h4 className="font-semibold text-sm text-purple-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                                       <UserCheck className="h-4 w-4" /> Vendor Assignment
+                                                   </h4>
+                                                   <div className="bg-white p-4 rounded-lg shadow-sm">
+                                                       <VendorAssignment 
+                                                           orderId={order._id}
+                                                           currentVendorId={order.vendor?._id}
+                                                           currentVendorName={order.vendor?.name}
+                                                           onAssigned={fetchOrders}
+                                                       />
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                               )}
+                         </div>
+                     </Card>
+                 ))
+             )}
+         </div>
+       )}
       </main>
     </div>
   )
