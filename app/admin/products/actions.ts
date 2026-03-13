@@ -78,8 +78,10 @@ export async function updateProductAction(id: string, formData: FormData) {
 
   // Auto-set main price from first weight if available
   let derivedPrice = price;
+  let derivedCuttedPrice;
   if (weights.length > 0) {
       derivedPrice = weights[0].price;
+      derivedCuttedPrice = weights[0].cuttedPrice;
   }
   
   await updateProduct(id, {

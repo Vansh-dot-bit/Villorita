@@ -22,7 +22,7 @@ export function VendorProductForm({ product, storeId }: VendorProductFormProps) 
   const isEditing = !!product
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<any[]>([])
-  const [weights, setWeights] = useState<{weight: string, price: number}[]>(product?.weights || [])
+  const [weights, setWeights] = useState<{weight: string, price: number, cuttedPrice?: number}[]>(product?.weights || [])
   const router = useRouter()
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export function VendorProductForm({ product, storeId }: VendorProductFormProps) 
                 <Label className="text-base font-semibold">Pricing & Variants</Label>
                 <p className="text-sm text-muted-foreground">Add at least one option.</p>
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => setWeights([...weights, { weight: '', price: 0 }])}>
+            <Button type="button" variant="outline" size="sm" onClick={() => setWeights([...weights, { weight: '', price: 0, cuttedPrice: 0 }])}>
                 Add Variant
             </Button>
         </div>

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { Minus, Plus, ShoppingBag, Heart, Share2, Clock } from 'lucide-react'
@@ -38,7 +38,7 @@ function generateScheduleSlots(deliveryTimeMins: number, makingTimeMins: number)
 }
 
 export function ProductActions({ price, product }: { price: number, product: any }) {
-  const productWeights: { weight: string; price: number }[] =
+  const productWeights: { weight: string; price: number; cuttedPrice?: number }[] =
     product.weights && product.weights.length > 0
       ? product.weights
       : [{ weight: '0.5kg', price: price, cuttedPrice: product.cuttedPrice }]
