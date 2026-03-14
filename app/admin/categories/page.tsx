@@ -27,6 +27,8 @@ export default function CategoriesPage() {
     const [newCategory, setNewCategory] = useState('');
     const [newCategoryImage, setNewCategoryImage] = useState('');
     const [selectedStoreId, setSelectedStoreId] = useState('');
+    const [storeProducts, setStoreProducts] = useState<any[]>([]);
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
     const [adding, setAdding] = useState(false);
 
     const fetchCategories = async () => {
@@ -59,11 +61,36 @@ export default function CategoriesPage() {
         }
     };
 
+    const fetchStoreProducts = async (storeId: string) => {
+        if (!storeId) {
+            setStoreProducts([]);
+            setSelectedProductIds([]);
+            return;
+        }
+        try {
+            const res = await fetch(`/api/products?storeId=${storeId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setStoreProducts(data.products);
+                setSelectedProductIds([]); // reset selection
+            }
+        } catch {
+            toast.error('Failed to load store products');
+        }
+    };
+
     useEffect(() => {
         fetchCategories();
         fetchStores();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        fetchStoreProducts(selectedStoreId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedStoreId]);
 
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,6 +112,7 @@ export default function CategoriesPage() {
                     color: 'bg-purple-100',
                     image: newCategoryImage,
                     storeId: selectedStoreId || undefined,
+                    productIds: selectedProductIds,
                 })
             });
 
@@ -95,6 +123,7 @@ export default function CategoriesPage() {
                 setNewCategory('');
                 setNewCategoryImage('');
                 setSelectedStoreId('');
+                setSelectedProductIds([]);
                 setCategories(prev => [data.category, ...prev]);
             } else {
                 toast.error(data.error || 'Failed to add category');
@@ -185,6 +214,45 @@ export default function CategoriesPage() {
                                     </p>
                                 )}
                             </div>
+
+                            {/* Product Selection */}
+                            {selectedStoreId && storeProducts.length > 0 && (
+                                <div className="border rounded-md p-3 bg-muted/30">
+                                    <label className="block text-sm font-medium mb-2">
+                                        Select Specific Products
+                                        <span className="ml-1 text-xs text-muted-foreground">(only these will show in category)</span>
+                                    </label>
+                                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                        {storeProducts.map((product) => (
+                                            <label key={product._id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 p-1 rounded transition-colors">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedProductIds.includes(product._id)}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setSelectedProductIds(prev => [...prev, product._id]);
+                                                        } else {
+                                                            setSelectedProductIds(prev => prev.filter(id => id !== product._id));
+                                                        }
+                                                    }}
+                                                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                                                />
+                                                <span className="truncate">{product.name}</span>
+                                                <span className="text-xs text-muted-foreground ml-auto">₹{product.price}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <p className="mt-2 text-xs text-muted-foreground">
+                                        {selectedProductIds.length} products selected.
+                                    </p>
+                                </div>
+                            )}
+
+                            {selectedStoreId && storeProducts.length === 0 && (
+                                <div className="p-3 bg-amber-50 border border-amber-100 rounded-md text-xs text-amber-700">
+                                    This store has no products. Add products to this store first if you want to link specific items.
+                                </div>
+                            )}
 
                             {/* Image */}
                             <ImageUploadInput

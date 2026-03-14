@@ -29,13 +29,13 @@ export async function POST(request: Request) {
         if (user instanceof Response) return user;
 
         const body = await request.json();
-        const { name, color, image, storeId } = body;
+        const { name, color, image, storeId, productIds } = body;
 
         if (!name) {
             return NextResponse.json({ error: 'Name is required' }, { status: 400 });
         }
 
-        const category = await addCategory(name, color, image, storeId || undefined);
+        const category = await addCategory(name, color, image, storeId || undefined, productIds || []);
         return NextResponse.json({ success: true, category });
     } catch (error: any) {
         console.error('Add Category Error:', error);

@@ -27,6 +27,14 @@ const CategorySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Store',
   },
+  productIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+  }],
+  isAdminCategory: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 export interface ICategory extends mongoose.Document {
@@ -35,13 +43,15 @@ export interface ICategory extends mongoose.Document {
   color: string;
   image?: string;
   storeId?: mongoose.Types.ObjectId;
+  productIds?: mongoose.Types.ObjectId[];
+  isAdminCategory: boolean;
   createdAt: Date;
 }
 
 // Prevent Mongoose overwriting model error in development
 if (mongoose.models.Category) {
   const schema = mongoose.models.Category.schema;
-  if (!schema.paths.storeId) {
+  if (!schema.paths.storeId || !schema.paths.isAdminCategory) {
       delete mongoose.models.Category;
   }
 }

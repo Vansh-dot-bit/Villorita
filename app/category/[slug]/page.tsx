@@ -23,10 +23,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const image = category?.image;
 
   const allProducts = await getProducts();
-  const products = allProducts.filter(p => 
-      p.category.toLowerCase() === slug.toLowerCase() || 
-      (category && p.category.toLowerCase() === category.name.toLowerCase())
-  );
+  const products = allProducts.filter(p => {
+      // If category has specific productIds, only show those
+      if (category?.productIds && category.productIds.length > 0) {
+          return category.productIds.includes(p.id);
+      }
+      
+      // Fallback to name/slug match
+      return p.category.toLowerCase() === slug.toLowerCase() || 
+             (category && p.category.toLowerCase() === category.name.toLowerCase());
+  });
 
   return (
     <div className="min-h-screen bg-background">

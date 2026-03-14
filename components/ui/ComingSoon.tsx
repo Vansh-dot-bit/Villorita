@@ -143,6 +143,7 @@ export function ComingSoon({ message }: ComingSoonProps) {
                 isOpen={isAuthModalOpen} 
                 onClose={() => setIsAuthModalOpen(false)} 
                 initialMode="login"
+                allowSignup={false}
             />
         </div>
     )

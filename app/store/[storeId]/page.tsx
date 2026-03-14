@@ -22,7 +22,7 @@ export default async function StorePage({ params }: { params: Promise<{ storeId:
       store = await Store.findById(storeId).lean();
       if (!store) return notFound();
 
-      categories = await Category.find({ storeId: storeId }).sort({ createdAt: -1 }).lean();
+      categories = await Category.find({ storeId: storeId, isAdminCategory: { $ne: true } }).sort({ createdAt: -1 }).lean();
       products = await Product.find({ storeId: storeId, isActive: true, isAvailable: true }).sort({ createdAt: -1 }).lean();
   } catch (error) {
       return notFound();

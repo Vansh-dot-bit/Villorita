@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, categories: [], message: 'No store assigned yet.' });
     }
 
-    const categories = await Category.find({ storeId: store.id }).sort({ name: 1 });
+    const categories = await Category.find({ storeId: store.id, isAdminCategory: { $ne: true } }).sort({ name: 1 });
     
     return NextResponse.json({ 
         success: true, 

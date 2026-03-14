@@ -14,14 +14,20 @@ function serializeCategory(category: any) {
     _id: obj._id.toString(),
     createdAt: obj.createdAt instanceof Date ? obj.createdAt.toISOString() : obj.createdAt,
     storeId,
+    productIds: obj.productIds?.map((id: any) => id.toString()) || [],
   };
 }
 
 
 export async function getCategories() {
   await dbConnect();
-  // Fetch only global categories (no storeId) for the public home page
-  const categories = await Category.find({ storeId: { $exists: false } }).sort({ name: 1 });
+  // Fetch global categories OR categories marked specifically by admin to show on home page
+  const categories = await Category.find({ 
+    $or: [
+      { storeId: { $exists: false } },
+      { isAdminCategory: true }
+    ]
+  }).sort({ name: 1 });
   return categories.map(serializeCategory);
 }
 
@@ -34,11 +40,11 @@ export async function getCategoriesAll() {
 
 export async function getCategoriesByStore(storeId: string) {
   await dbConnect();
-  const categories = await Category.find({ storeId }).sort({ name: 1 });
+  const categories = await Category.find({ storeId, isAdminCategory: { $ne: true } }).sort({ name: 1 });
   return categories.map(serializeCategory);
 }
 
-export async function addCategory(name: string, color?: string, image?: string, storeId?: string) {
+export async function addCategory(name: string, color?: string, image?: string, storeId?: string, productIds?: string[]) {
     await dbConnect();
     const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
     
@@ -46,7 +52,7 @@ export async function addCategory(name: string, color?: string, image?: string, 
     const existing = await Category.findOne({ slug, storeId: storeId || { $exists: false } });
     if (existing) throw new Error('Category already exists');
 
-    const category = await Category.create({ name, slug, color, image, storeId });
+    const category = await Category.create({ name, slug, color, image, storeId, productIds, isAdminCategory: true });
     return serializeCategory(category);
 }
 

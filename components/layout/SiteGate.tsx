@@ -43,12 +43,22 @@ export function SiteGate({ children }: { children: React.ReactNode }) {
 
     // Bypass logic:
     // 1. If "Coming Soon" is OFF
-    // 2. If user is ADMIN or SUPERADMIN
-    // 3. If the current path is specifically excluded (like admin panel)
-    const canBypass = 
-        !settings?.isComingSoon || 
-        (user && (user.role === 'admin' || user.role === 'superadmin')) ||
-        isExcludedPath;
+    // 2. If user is ADMIN or SUPERADMIN (Full access)
+    // 3. If user is VENDOR and path is vendor dashboard or API
+    // 4. If user is DELIVERY_AGENT and path is delivery dashboard or API
+    // 5. If path is API or Login (Universal access)
+    
+    let canBypass = !settings?.isComingSoon;
+
+    if (settings?.isComingSoon) {
+        const isStaff = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'vendor' || user?.role === 'delivery_agent';
+        
+        if (isStaff) {
+            canBypass = true;
+        } else if (pathname.startsWith('/api') || pathname.startsWith('/login')) {
+            canBypass = true;
+        }
+    }
 
     if (!canBypass) {
         return <ComingSoon message={settings?.comingSoonMessage} />;

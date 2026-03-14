@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
+    const storeId = searchParams.get('storeId');
 
     let query: any = { isActive: true };
     
@@ -21,6 +22,10 @@ export async function GET(request: NextRequest) {
 
     if (category) {
       query.category = category;
+    }
+    
+    if (storeId) {
+      query.storeId = storeId;
     }
 
     if (search) {

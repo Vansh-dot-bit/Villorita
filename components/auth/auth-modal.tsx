@@ -12,10 +12,11 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup';
+  allowSignup?: boolean;
 }
 
-export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
-  const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
+export function AuthModal({ isOpen, onClose, initialMode = 'login', allowSignup = true }: AuthModalProps) {
+  const [mode, setMode] = useState<'login' | 'signup'>(allowSignup ? initialMode : 'login');
 
   // Form fields
   const [email, setEmail] = useState('');
@@ -44,6 +45,7 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
 
     if (isOpen) {
       resetState();
+      if (!allowSignup) setMode('login');
       document.body.style.overflow = 'hidden';
       document.body.classList.add('auth-modal-open');
     } else {
@@ -364,17 +366,19 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
 
             </form>
 
-            <div className="mt-8 text-center text-sm">
-              <span className="text-gray-500">
-                {isSignup ? 'Already have an account?' : "Don't have an account?"}
-              </span>
-              <button
-                onClick={() => switchMode(isSignup ? 'login' : 'signup')}
-                className="ml-2 font-semibold text-primary hover:underline"
-              >
-                {isSignup ? 'Login' : 'Sign Up'}
-              </button>
-            </div>
+            {allowSignup && (
+              <div className="mt-8 text-center text-sm">
+                <span className="text-gray-500">
+                  {isSignup ? 'Already have an account?' : "Don't have an account?"}
+                </span>
+                <button
+                  onClick={() => switchMode(isSignup ? 'login' : 'signup')}
+                  className="ml-2 font-semibold text-primary hover:underline"
+                >
+                  {isSignup ? 'Login' : 'Sign Up'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
